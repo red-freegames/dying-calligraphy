@@ -1,0 +1,1289 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>ダイイング・カリグラフィー</title>
+<meta name="description" content="刺された。視界が暗く揺れて闇に沈む前に、犯人の名前を床に血文字で遺せ。死後、警察があなたのダイイングメッセージを解読する。全3事件の瀕死アクション。">
+<meta name="theme-color" content="#0b0505">
+<meta property="og:title" content="ダイイング・カリグラフィー">
+<meta property="og:description" content="刺された。闇に沈む前に、犯人の名前を血文字で遺せ。見えないまま書いた文字の全貌を、警察（みんな）は解読できるか。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://red-freegames.github.io/dying-calligraphy/">
+<meta property="og:image" content="https://red-freegames.github.io/dying-calligraphy/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://red-freegames.github.io/dying-calligraphy/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blood:#8e0b12;
+  --blood2:#c3121d;
+  --ink:#1b2130;
+  --paper:#f4f1ea;
+  --brush:"Yuji Syuku","Hiragino Mincho ProN","Yu Mincho",serif;
+  --sans:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0b0505;color:#eee;font-family:var(--sans);overflow:hidden;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+button{font-family:inherit;cursor:pointer;border:0}
+.screen{position:fixed;inset:0;display:none}
+.screen.active{display:block}
+
+/* ---------- TITLE ---------- */
+#title{background:radial-gradient(ellipse at 50% 30%,#2a0709 0%,#0b0505 70%);overflow-y:auto}
+#title .drips{position:absolute;top:0;left:0;right:0;height:120px;pointer-events:none}
+.t-inner{position:relative;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 20px 40px;text-align:center;gap:18px;max-width:560px;margin:0 auto}
+.t-pre{font-family:var(--brush);color:#c9a9a9;letter-spacing:.3em;font-size:14px}
+h1{font-family:var(--brush);font-weight:400;font-size:clamp(40px,11vw,72px);line-height:1.05;color:var(--blood2);
+  text-shadow:0 0 18px rgba(195,18,29,.45),0 3px 0 #3a0004;letter-spacing:.02em}
+h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin-top:10px;text-shadow:none}
+.t-lead{font-family:var(--brush);font-size:clamp(17px,4.6vw,21px);line-height:1.9;color:#efe6e6}
+.t-lead b{color:#ff4a52;font-size:1.25em}
+.t-lead em{font-style:normal;border-bottom:2px solid var(--blood2)}
+.t-rule{list-style:none;display:grid;gap:8px;font-size:14px;color:#cdbebe;text-align:left;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 18px;width:100%}
+.t-rule li::before{content:"🩸";margin-right:8px}
+.t-stages{list-style:none;display:grid;gap:8px;width:100%}
+.t-stages li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px 16px;border-radius:10px;
+  background:linear-gradient(90deg,rgba(195,18,29,.18),rgba(195,18,29,.04));border:1px solid rgba(195,18,29,.3);text-align:left}
+.t-stages b{font-family:var(--brush);font-weight:400;font-size:18px;color:#fff}
+.t-stages span{font-size:14px;color:#dcc}
+.t-stages em{font-style:normal;font-weight:900;color:#ff5a62;font-size:18px}
+#btnStart{margin-top:6px;font-size:22px;font-weight:900;letter-spacing:.2em;color:#fff;padding:18px 56px;border-radius:999px;
+  background:linear-gradient(180deg,#d01622,#7d0610);box-shadow:0 8px 30px rgba(208,22,34,.45),inset 0 1px 0 rgba(255,255,255,.25);
+  transition:transform .12s}
+#btnStart:active{transform:scale(.96)}
+.t-note{font-size:12px;color:#866}
+/* ===== RED FREE GAMES 共通：他のゲーム・要望フォーム・フッター ===== */
+.t-more{display:block;width:100%;max-width:340px;padding:14px;border-radius:999px;text-align:center;text-decoration:none;font-weight:900;font-size:17px;
+  color:#fff;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.35)}
+.t-more:active{transform:scale(.97)}
+.btn-more{display:block;padding:16px;border-radius:12px;font-size:16px;font-weight:900;text-align:center;text-decoration:none;
+  background:#1b2130;color:#fff}
+.fb-link{display:block;margin-top:2px;font-size:12.5px;font-weight:700;color:#c9a9a9;text-decoration:underline;text-align:center}
+.fb-link.r{color:#556;margin-top:12px}
+.site-foot{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:6px;font-size:11.5px;font-weight:700;color:#a99}
+.site-foot .coffee{background:#ffdd57;color:#2a1a14;border:2px solid #2a1a14;border-radius:99px;padding:6px 12px;text-decoration:none}
+.site-foot .pv{color:#a99;font-weight:600;text-decoration:underline}
+
+/* ---------- GAME ---------- */
+#game{background:#000;touch-action:none;cursor:none}
+#stage{position:absolute;inset:0;transform-origin:50% 50%;will-change:filter,transform}
+#stage canvas{position:absolute;left:0;top:0}
+#fog{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 50% 50%,rgba(120,0,6,.35) 0%,rgba(60,0,2,.78) 55%,rgba(20,0,0,.95) 100%)}
+#noise{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0;mix-blend-mode:overlay;image-rendering:pixelated}
+#tunnel{position:absolute;inset:0;pointer-events:none}
+#dark{position:absolute;inset:0;pointer-events:none;background:#000;opacity:0}
+#hurt{position:absolute;inset:0;pointer-events:none;background:#c00;opacity:0}
+#hurt.on{animation:hurt .7s ease-out}
+@keyframes hurt{0%{opacity:.85}100%{opacity:0}}
+#hud{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 12px) 16px 0;display:flex;align-items:center;gap:12px;pointer-events:none;z-index:5}
+#hud .heart{font-size:26px;filter:drop-shadow(0 0 6px rgba(255,0,0,.6));transition:transform .08s}
+#life{flex:1;height:12px;border-radius:99px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.25);overflow:hidden}
+#life i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff2a36,#ff7a50);transform-origin:left;box-shadow:0 0 10px #f22}
+#timer{font-weight:900;font-size:22px;min-width:74px;text-align:right;color:#fff;text-shadow:0 0 8px #000,0 0 2px #000;font-variant-numeric:tabular-nums}
+#msg{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 28px);text-align:center;font-family:var(--brush);
+  font-size:clamp(18px,5vw,26px);color:#fff;text-shadow:0 0 10px #000,0 0 3px #000;pointer-events:none;z-index:5;transition:opacity .6s;padding:0 16px}
+#ready{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;pointer-events:none;z-index:6;
+  text-align:center;padding:16px}
+#ready p{font-family:var(--brush);font-size:clamp(18px,5.4vw,26px);color:#3a0a0a;background:rgba(255,248,236,.82);padding:10px 20px;border-radius:12px;
+  box-shadow:0 6px 30px rgba(0,0,0,.25);animation:breathe 1.4s ease-in-out infinite}
+#ready p b{color:#c3121d;font-size:1.3em}
+#ready small{font-size:13px;color:#4a2a2a;background:rgba(255,248,236,.7);padding:6px 12px;border-radius:8px}
+#ready .stage-no{font-family:var(--brush);font-size:18px;letter-spacing:.4em;color:#fff;background:#7d0610;padding:6px 16px 6px 22px;border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#ready .odai-label{font-size:13px;font-weight:700;color:#4a2a2a;background:rgba(255,248,236,.75);padding:4px 12px;border-radius:6px}
+#ready .odai-big{font-family:var(--brush);font-size:clamp(40px,13vw,72px);line-height:1.2;color:#2a0306;background:rgba(255,248,236,.92);padding:4px 26px;border-radius:12px;
+  letter-spacing:.14em;box-shadow:0 6px 30px rgba(0,0,0,.25)}
+#hudOdai{position:absolute;top:calc(env(safe-area-inset-top) + 46px);left:16px;font-size:13px;font-weight:700;color:#fff;background:rgba(0,0,0,.55);
+  padding:5px 12px;border-radius:6px;z-index:5;pointer-events:none}
+#hudOdai b{font-family:var(--brush);font-weight:400;font-size:17px;margin-left:4px;letter-spacing:.08em}
+#slow{position:absolute;left:0;right:0;top:22%;text-align:center;font-family:var(--brush);font-size:clamp(20px,6vw,30px);color:#fff;
+  text-shadow:0 0 12px #000,0 0 4px #000;z-index:5;pointer-events:none;opacity:0;transition:opacity .25s}
+#slow.on{opacity:1}
+@keyframes breathe{50%{transform:scale(1.04)}}
+#black{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:10;transition:opacity 1.1s ease-in;display:flex;align-items:center;justify-content:center}
+#black.on{opacity:1}
+#dokun{font-family:var(--brush);font-size:clamp(28px,9vw,54px);color:#5a0006;opacity:0;transition:opacity .25s,transform .25s;letter-spacing:.1em}
+#dokun.beat{opacity:1;transform:scale(1.12);color:#9b0a12;text-shadow:0 0 22px rgba(160,0,10,.6)}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:50}
+#flash.on{animation:flash 1.3s ease-out forwards}
+@keyframes flash{0%{opacity:1}100%{opacity:0}}
+
+/* ---------- RESULT ---------- */
+#result,#final{background:var(--paper);color:var(--ink);overflow-y:auto;-webkit-overflow-scrolling:touch;-webkit-user-select:text;user-select:text;
+  background-image:linear-gradient(rgba(30,40,60,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(30,40,60,.05) 1px,transparent 1px);background-size:24px 24px}
+.r-wrap{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 20px) 16px 48px}
+.r-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:3px solid var(--ink);padding-bottom:10px;margin-bottom:16px;flex-wrap:wrap}
+.r-head .badge{display:inline-block;background:var(--ink);color:#ffd23a;font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.1em}
+.r-head h2{font-family:var(--brush);font-weight:400;font-size:clamp(22px,6vw,32px);margin-top:6px}
+.r-head .case{font-size:12px;color:#556;text-align:right;line-height:1.6}
+.evidence{position:relative;background:#fff;padding:10px 10px 36px;box-shadow:0 10px 30px rgba(20,25,40,.18),0 2px 4px rgba(20,25,40,.12);transform:rotate(-.6deg)}
+.evidence img{display:block;width:100%;height:auto;background:#d9cdb4}
+.evidence.reveal img{animation:expose 1.6s ease-out}
+@keyframes expose{0%{filter:brightness(4) contrast(.4) blur(6px)}35%{filter:brightness(1.8) contrast(.8) blur(1px)}100%{filter:none}}
+.evidence figcaption{position:absolute;left:12px;right:12px;bottom:8px;font-size:12px;color:#445;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evidence .tape{position:absolute;top:-10px;width:90px;height:24px;background:rgba(255,230,140,.75);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.evidence .tape.l{left:14px;transform:rotate(-8deg)}.evidence .tape.r{right:14px;transform:rotate(7deg)}
+.score-box{position:relative;margin:26px 0 8px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 18px}
+.score-box .label{grid-column:1/-1;font-weight:700;color:#556;letter-spacing:.2em;font-size:14px}
+.score{font-weight:900;font-size:clamp(64px,20vw,108px);line-height:1;color:var(--blood2);font-variant-numeric:tabular-nums}
+.score small{font-size:.42em;margin-left:2px}
+.meter{height:14px;background:#e2dccf;border-radius:99px;overflow:hidden;border:1px solid #cfc6b4;align-self:end;margin-bottom:14px}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7d0610,#e01b26);transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.stamp{position:absolute;right:4px;top:-6px;width:96px;height:96px;border:4px solid #d0101c;border-radius:50%;color:#d0101c;display:flex;align-items:center;justify-content:center;
+  font-family:var(--brush);font-size:22px;transform:rotate(-14deg) scale(2.4);opacity:0;pointer-events:none;mix-blend-mode:multiply}
+.stamp::after{content:"";position:absolute;inset:5px;border:2px solid #d0101c;border-radius:50%}
+.stamp.on{animation:stamp .35s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes stamp{to{opacity:.9;transform:rotate(-14deg) scale(1)}}
+.comment{font-family:var(--brush);font-size:clamp(22px,6.2vw,30px);line-height:1.5;padding:14px 16px;border-left:6px solid var(--blood2);background:rgba(255,255,255,.7);
+  opacity:0;transform:translateY(8px);transition:.5s}
+.comment.on{opacity:1;transform:none}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0 6px}
+.stats div{background:#fff;border:1px solid #ddd5c5;border-radius:10px;padding:10px 12px}
+.stats dt{font-size:11px;color:#667;letter-spacing:.08em}
+.stats dd{font-weight:900;font-size:20px;margin-top:2px}
+.stats .wide{grid-column:1/-1}
+.stats .wide dd{font-family:var(--brush);font-weight:400;font-size:18px}
+.share{margin-top:28px;padding-top:20px;border-top:2px dashed #c9bfae}
+.share h3{font-size:14px;letter-spacing:.2em;color:#556;margin-bottom:10px}
+#cardImg{display:block;width:100%;max-width:520px;margin:0 auto 16px;border-radius:10px;box-shadow:0 8px 26px rgba(20,25,40,.2)}
+.btns{display:grid;gap:10px;max-width:520px;margin:0 auto}
+.btns button{padding:16px;border-radius:12px;font-size:16px;font-weight:700}
+.btnX{background:#000;color:#fff;font-size:17px}
+.btnX .x{font-size:20px;margin-right:6px}
+.btnSave{background:#fff;color:var(--ink);border:2px solid var(--ink) !important}
+#btnRestart{background:linear-gradient(180deg,#d01622,#7d0610);color:#fff}
+#fCardImg{display:block;width:100%;max-width:520px;margin:0 auto 16px;border-radius:10px;box-shadow:0 8px 26px rgba(20,25,40,.2)}
+#btnNext{background:linear-gradient(180deg,#d01622,#7d0610);color:#fff;font-size:18px;padding:18px}
+.btn-sub{background:transparent;color:#556;border:1px solid #c9bfae !important}
+.next-top{max-width:520px;margin:22px auto 0}
+.next-top button{width:100%}
+/* final */
+.f-list{display:grid;gap:14px}
+.f-item{display:grid;grid-template-columns:minmax(0,1.25fr) 1fr;gap:14px;background:#fff;border:1px solid #ddd5c5;border-radius:12px;padding:10px;align-items:center;
+  box-shadow:0 4px 14px rgba(20,25,40,.08)}
+.f-item img{width:100%;display:block;border-radius:6px}
+.f-item .lab{font-family:var(--brush);font-size:16px}
+.f-item .lab small{font-family:var(--sans);font-size:11px;color:#667;margin-left:6px}
+.f-item .sc{font-weight:900;font-size:40px;line-height:1.1;color:var(--blood2)}
+.f-item .sc small{font-size:.5em}
+.f-item .od{font-size:12px;color:#556;margin-top:4px}
+.f-item .od b{font-family:var(--brush);font-weight:400;font-size:17px;color:var(--ink)}
+.f-item .cm{font-size:12px;color:#445;margin-top:4px;line-height:1.5}
+.f-item .vd{font-family:var(--brush);font-size:20px;color:var(--blood2);margin-top:2px}
+.f-item .vd.cold{color:#4a5468}
+.verdict{position:relative;margin:4px 0 20px;padding:12px 16px 14px;text-align:center;border:5px double currentColor;border-radius:6px;
+  color:var(--blood2);background:rgba(255,255,255,.8);opacity:0;transform:rotate(-1.2deg) scale(1.6)}
+.verdict.on{animation:vstamp .4s cubic-bezier(.3,1.6,.5,1) forwards}
+@keyframes vstamp{to{opacity:1;transform:rotate(-1.2deg) scale(1)}}
+.verdict small{display:block;font-size:12px;font-weight:700;letter-spacing:.3em;color:#556}
+.verdict b{display:block;font-family:var(--brush);font-weight:400;font-size:clamp(38px,12vw,64px);line-height:1.25;letter-spacing:.06em}
+.verdict span{display:block;font-size:14px;color:#334;margin-top:2px}
+.verdict.cold{color:#4a5468}
+.rank{font-family:var(--brush);font-size:clamp(28px,8vw,40px);color:var(--ink);margin-top:4px}
+.rank small{font-size:.45em;color:#667;margin-right:8px;font-family:var(--sans);font-weight:700;letter-spacing:.1em}
+@media (max-width:480px){.f-item{grid-template-columns:1fr}}
+.note{font-size:12px;color:#667;text-align:center;margin-top:10px;min-height:1.4em}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%) translateY(20px);background:#1b2130;color:#fff;
+  padding:12px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;z-index:60;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
+#toast.on{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+
+<!-- ====== TITLE ====== -->
+<section id="title" class="screen active">
+  <svg class="drips" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+    <path fill="#6d0309" d="M0 0h400v14c-12 0-14 30-22 30s-8-22-20-22-10 58-20 58-6-50-18-50-12 18-24 18-10-24-22-24-6 70-18 70-8-62-20-62-14 26-26 26-8-30-20-30-10 44-22 44-8-36-18-36-14 16-26 16-12-28-22-28-8 48-18 48-10-40-22-40-10 20-20 20-12-26-24-26-6 34-16 34S8 16 0 16z"/>
+  </svg>
+  <div class="t-inner">
+    <p class="t-pre">― 瀕死の血文字アクション ―</p>
+    <h1>ダイイング<br>カリグラフィー<small>DYING CALLIGRAPHY</small></h1>
+    <p class="t-lead">あなたは刺された。<br>残された時間は、<b>あとわずか</b>。<br>犯人の名を、<em>読める字で</em>遺せ。</p>
+    <ul class="t-rule">
+      <li>指／マウスで床に犯人の名前を血文字で書く</li>
+      <li>腕が重く、速くは書けない</li>
+      <li>意識が遠のき、視界が暗く揺れていく</li>
+      <li>見えないまま、見当違いの場所に書いてしまう</li>
+      <li>死後、警察があなたの血文字から犯人を追う</li>
+    </ul>
+    <ol class="t-stages">
+      <li><b>第一の事件</b><span>カタカナ3文字</span><em>5秒</em></li>
+      <li><b>第二の事件</b><span>ひらがな4文字</span><em>6秒</em></li>
+      <li><b>最後の事件</b><span>漢字4文字</span><em>12秒</em></li>
+    </ol>
+    <button id="btnStart">刺される</button>
+    <p class="t-note">※ 音が出ます（心音・鑑識フラッシュ）</p>
+    <a class="t-more" href="https://red-freegames.github.io/">🎮 他のゲームを見る</a>
+    <a class="fb-link" id="fbTitle" target="_blank" rel="noopener">💬 要望・バグ報告はこちら</a>
+    <footer class="site-foot">
+      <a class="coffee" href="https://buymeacoffee.com/red_freegames" target="_blank" rel="noopener">開発者にコーヒーを奢る☕</a>
+      <span>配信・動画利用大歓迎！商用利用OK</span>
+      <a class="pv" href="https://red-freegames.github.io/privacy.html" target="_blank" rel="noopener">プライバシー</a>
+    </footer>
+  </div>
+</section>
+
+<!-- ====== GAME ====== -->
+<section id="game" class="screen">
+  <div id="stage">
+    <canvas id="bg"></canvas>
+    <canvas id="ink"></canvas>
+    <canvas id="pen"></canvas>
+  </div>
+  <div id="fog"></div>
+  <canvas id="noise"></canvas>
+  <div id="dark"></div>
+  <div id="tunnel"></div>
+  <div id="hurt"></div>
+  <div id="hud"><span class="heart" id="heart">❤️</span><div id="life"><i id="lifeFill"></i></div><span id="timer">15.0</span></div>
+  <div id="hudOdai"></div>
+  <div id="slow">腕が……重い……！</div>
+  <div id="msg"></div>
+  <div id="ready">
+    <span class="stage-no" id="stageNo">第一の事件</span>
+    <span class="odai-label" id="stageType">犯人の名（カタカナ3文字）</span>
+    <div class="odai-big" id="odai2"></div>
+    <p>床に触れた瞬間、<br>最期の<b id="stageSec">5</b>秒が始まる……</p>
+    <small>腕は重く、速くは書けない／指を離しても時間は止まらない</small>
+  </div>
+  <div id="black"><p id="dokun"></p></div>
+</section>
+
+<div id="flash"></div>
+
+<!-- ====== RESULT ====== -->
+<section id="result" class="screen">
+  <div class="r-wrap">
+    <header class="r-head">
+      <div><span class="badge" id="rBadge">鑑識課 第七係</span><h2>ダイイングメッセージ鑑定書</h2></div>
+      <p class="case" id="caseInfo"></p>
+    </header>
+    <div class="verdict" id="verdict"><small>捜査結果</small><b id="vText"></b><span id="vSub"></span></div>
+    <figure class="evidence" id="evidence">
+      <span class="tape l"></span><span class="tape r"></span>
+      <img id="evImg" alt="現場床面に遺された血文字の全貌">
+      <figcaption id="evCap"></figcaption>
+    </figure>
+    <div class="score-box">
+      <div class="label">解読率（AI鑑識）</div>
+      <div class="score"><span id="scoreNum">0</span><small>%</small></div>
+      <div class="meter"><i id="meterFill"></i></div>
+      <div class="stamp" id="stamp">鑑定済</div>
+    </div>
+    <p class="comment" id="comment"></p>
+    <dl class="stats">
+      <div><dt>字形の保持</dt><dd id="stSteady">-</dd></div>
+      <div><dt>配置の正確さ</dt><dd id="stLen">-</dd></div>
+      <div><dt>画数（総延長）</dt><dd id="stCount">-</dd></div>
+      <div><dt>狙いとのズレ（最大）</dt><dd id="stShake">-</dd></div>
+      <div class="wide"><dt>AI鑑識による解読</dt><dd id="stGuess">-</dd></div>
+      <div class="wide"><dt>本人が書いたつもりの名前（お題）</dt><dd id="stOdai">-</dd></div>
+    </dl>
+    <div class="next-top btns"><button id="btnNext">次の事件へ ▶</button></div>
+    <div class="share">
+      <h3>SNSシェアカード</h3>
+      <img id="cardImg" alt="シェア用カード画像">
+      <div class="btns">
+        <button class="btnX"><span class="x">𝕏</span>で警察（みんな）に解読してもらう</button>
+        <button class="btnSave">カード画像を保存</button>
+        <button id="btnRetry" class="btn-sub">この事件をやり直す</button>
+        <a class="btn-more" href="https://red-freegames.github.io/">🎮 他のゲームを見る</a>
+      </div>
+      <p class="note"></p>
+      <a class="fb-link r" id="fbResult" target="_blank" rel="noopener">💬 要望・バグ報告はこちら</a>
+    </div>
+  </div>
+</section>
+
+<!-- ====== FINAL ====== -->
+<section id="final" class="screen">
+  <div class="r-wrap">
+    <header class="r-head">
+      <div><span class="badge">鑑識課 第七係 ／ 最終報告</span><h2>連続ダイイングメッセージ事件</h2></div>
+      <p class="case" id="fCase"></p>
+    </header>
+    <div class="verdict" id="fVerdict"><small>最終捜査結果</small><b id="fvText"></b><span id="fvSub"></span></div>
+    <div class="f-list" id="fList"></div>
+    <div class="score-box">
+      <div class="label">総合解読率</div>
+      <div class="score"><span id="fScore">0</span><small>%</small></div>
+      <div class="meter"><i id="fMeter"></i></div>
+      <div class="stamp" id="fStamp">最終鑑定</div>
+    </div>
+    <p class="comment" id="fComment"></p>
+    <div class="share">
+      <h3>SNSシェアカード（3事件まとめ）</h3>
+      <img id="fCardImg" alt="3事件まとめのシェア用カード画像">
+      <div class="btns">
+        <button class="btnX"><span class="x">𝕏</span>で警察（みんな）に全部解読してもらう</button>
+        <button class="btnSave">カード画像を保存</button>
+        <button id="btnRestart">第一の事件から、もう一度刺される</button>
+        <a class="btn-more" href="https://red-freegames.github.io/">🎮 他のゲームを見る</a>
+        <button id="btnTitle" class="btn-sub">タイトルへ</button>
+      </div>
+      <p class="note"></p>
+      <a class="fb-link r" id="fbFinal" target="_blank" rel="noopener">💬 要望・バグ報告はこちら</a>
+    </div>
+  </div>
+</section>
+<div id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rnd = (a = 1, b) => b === undefined ? Math.random() * a : a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+/* stages: sec = time to live, sway = how hard the dying vision drifts & darkens,
+   speed = max arm speed (screen-short-side per second), len = ink length for full "筆の量",
+   strokes = rough stroke count the name needs */
+const STAGES = [
+  { name: '第一の事件', sec: 5, type: 'カタカナ3文字', sway: 0.6, speed: 0.95, len: 1.3, strokes: 6,
+    odai: ['タナカ', 'サトウ', 'スズキ', 'ヨシダ', 'ヤマダ', 'イトウ', 'カトウ', 'キムラ', 'モリタ', 'ハヤシ'] },
+  { name: '第二の事件', sec: 6, type: 'ひらがな4文字', sway: 0.9, speed: 0.88, len: 2.3, strokes: 8,
+    odai: ['たかはし', 'やまもと', 'なかむら', 'こばやし', 'いのうえ', 'まつもと', 'さかもと', 'にしかわ', 'よしむら', 'おかもと'] },
+  { name: '最後の事件', sec: 12, type: '漢字4文字', sway: 1.2, speed: 0.75, len: 3.4, strokes: 20,
+    odai: ['鈴木次郎', '片岡愛里', '山田花子', '田中一郎', '佐藤正人', '中川大地', '小林春子', '森本光一', '大山力也', '石田正子'] },
+];
+let stageIdx = 0, T = STAGES[0].sec, stageResults = [];
+const lvl = () => STAGES[stageIdx];
+
+/* ---------- elements ---------- */
+const scr = { title: $('#title'), game: $('#game'), result: $('#result'), final: $('#final') };
+const game = $('#game'), stage = $('#stage');
+const bg = $('#bg'), ink = $('#ink'), pen = $('#pen'), noise = $('#noise');
+const bctx = bg.getContext('2d'), ictx = ink.getContext('2d'), pctx = pen.getContext('2d'), nctx = noise.getContext('2d');
+const fog = $('#fog'), tunnel = $('#tunnel'), hud = $('#hud'), msg = $('#msg'), ready = $('#ready'), dark = $('#dark');
+const black = $('#black'), dokun = $('#dokun'), flash = $('#flash'), hurt = $('#hurt');
+
+/* ---------- state ---------- */
+let W, H, M, DPR, base, brush;           // M = floor margin beyond the screen (the view sways)
+let state = 'title'; // title | ready | play | dying | result | final
+let t0 = 0, elapsed = 0;
+let raw = { x: 0, y: 0 }, hasPointer = false, down = false;
+let hand = { x: 0, y: 0 }, lag = 0, lastFrame = 0; // speed-limited arm position (screen space)
+let strokes = [], cur = null, last = null, lastMid = null, curW = 0, strokeColor = '';
+let drips = [];
+let bbox;
+// the dying player's view of the floor: drifts, tilts, lurches. Ink lands in floor space.
+let view = { x: 0, y: 0, rot: 0, s: 1, lx: 0, ly: 0, lvx: 0, lvy: 0, ph: [], A: 0, maxD: 0 };
+let blink = null;
+let nextBeat = 0, pulse = 0, tun = { x: 0, y: 0 };
+let msgPhase = 0, odai = '';
+let result = null, cardCanvas = null, evCanvas = null;
+let shareCtx = null; // { canvas, blob, text, name }
+let noiseImg = null, frame = 0;
+
+function show(name) {
+  for (const k in scr) scr[k].classList.toggle('active', k === name);
+}
+
+/* ---------- audio ---------- */
+let AC = null, master = null, tinn = null, nbuf = null;
+function initAudio() {
+  try {
+    if (!AC) {
+      AC = new (window.AudioContext || window.webkitAudioContext)();
+      master = AC.createGain(); master.gain.value = 0.9; master.connect(AC.destination);
+      nbuf = AC.createBuffer(1, AC.sampleRate * 1, AC.sampleRate);
+      const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (AC.state === 'suspended') AC.resume();
+  } catch (e) { AC = null; }
+}
+function noiseHit(at, dur, type, freq, vol, q = 1) {
+  const s = AC.createBufferSource(); s.buffer = nbuf;
+  const f = AC.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q;
+  const g = AC.createGain();
+  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + 0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+  s.connect(f); f.connect(g); g.connect(master); s.start(at, rnd(0.5)); s.stop(at + dur + 0.05);
+}
+function thump(at, vol) {
+  const g = AC.createGain(), f = AC.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.value = 260;
+  g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(vol, at + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + 0.32);
+  for (const [type, f0, f1, m] of [['sine', 78, 38, 1], ['triangle', 150, 70, 0.55]]) {
+    const o = AC.createOscillator(), og = AC.createGain(); o.type = type; og.gain.value = m;
+    o.frequency.setValueAtTime(f0, at); o.frequency.exponentialRampToValueAtTime(f1, at + 0.2);
+    o.connect(og); og.connect(f); o.start(at); o.stop(at + 0.36);
+  }
+  f.connect(g); g.connect(master);
+  noiseHit(at, 0.06, 'lowpass', 380, vol * 0.35);
+}
+function heartbeat(vol) {
+  if (!AC) return;
+  const t = AC.currentTime + 0.01;
+  thump(t, vol); thump(t + 0.27, vol * 0.62);
+}
+function sfxStab() {
+  if (!AC) return;
+  const t = AC.currentTime + 0.01;
+  noiseHit(t, 0.28, 'lowpass', 900, 0.7);
+  noiseHit(t, 0.05, 'highpass', 3000, 0.35);
+  thump(t + 0.02, 1);
+}
+function tinnitus(on) {
+  if (!AC) return;
+  if (on && !tinn) {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = 'sine'; o.frequency.value = 5100; g.gain.value = 0.0001;
+    o.connect(g); g.connect(master); o.start();
+    tinn = { o, g };
+  } else if (!on && tinn) {
+    try { tinn.o.stop(); } catch (e) {}
+    tinn = null;
+  }
+}
+function sfxFlashCharge() {
+  if (!AC) return;
+  const t = AC.currentTime + 0.01, o = AC.createOscillator(), g = AC.createGain();
+  o.type = 'sine'; o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(6500, t + 0.55);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.1); g.gain.linearRampToValueAtTime(0.0001, t + 0.58);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.6);
+}
+function sfxShutter() {
+  if (!AC) return;
+  const t = AC.currentTime + 0.01;
+  noiseHit(t, 0.05, 'bandpass', 2500, 0.9, 0.8);
+  noiseHit(t + 0.075, 0.06, 'bandpass', 1600, 0.6, 0.8);
+  noiseHit(t, 0.35, 'highpass', 5000, 0.12);
+}
+const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+
+/* ---------- setup ---------- */
+function setup() {
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth; H = window.innerHeight; base = Math.min(W, H);
+  M = Math.round(base * 0.35);
+  brush = clamp(base * 0.021, 5, 16);
+  // floor canvases extend M beyond the screen on every side; floor coords = screen coords at rest
+  for (const [c, ctx] of [[bg, bctx], [ink, ictx], [pen, pctx]]) {
+    c.width = Math.round((W + 2 * M) * DPR); c.height = Math.round((H + 2 * M) * DPR);
+    c.style.width = (W + 2 * M) + 'px'; c.style.height = (H + 2 * M) + 'px';
+    c.style.left = -M + 'px'; c.style.top = -M + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, M * DPR, M * DPR);
+  }
+  const nw = 140, nh = Math.max(1, Math.round(140 * H / W));
+  noise.width = nw; noise.height = nh; noiseImg = nctx.createImageData(nw, nh);
+  drawFloor();
+}
+function drawFloor() {
+  const g = bctx, X0 = -M, Y0 = -M, FW = W + 2 * M, FH = H + 2 * M;
+  g.fillStyle = '#d8cbb0'; g.fillRect(X0, Y0, FW, FH);
+  const pw = clamp(base * 0.2, 60, 140);
+  for (let x = X0 - rnd(pw); x < X0 + FW; x += pw) {
+    const l = 68 + rnd(-4, 5);
+    g.fillStyle = `hsl(${34 + rnd(-3, 3)},${26 + rnd(-4, 4)}%,${l}%)`;
+    g.fillRect(x, Y0, pw, FH);
+    g.lineWidth = 1;
+    for (let k = 0; k < 9; k++) {
+      g.strokeStyle = `rgba(90,60,30,${rnd(0.03, 0.09)})`;
+      g.beginPath();
+      const gx = x + rnd(pw), amp = rnd(1, 5), fr = rnd(0.004, 0.02), ph = rnd(6);
+      for (let y = Y0; y <= Y0 + FH; y += 8) g.lineTo(gx + Math.sin(y * fr + ph) * amp, y);
+      g.stroke();
+    }
+    g.fillStyle = 'rgba(60,40,20,.35)'; g.fillRect(x, Y0, 1.5, FH);
+    for (let c = 0; c < 2; c++) g.fillRect(x, Y0 + rnd(FH), pw, 1.2);
+  }
+  for (let i = 0; i < 2600; i++) {
+    g.fillStyle = `rgba(${rnd() < .5 ? '60,40,20' : '255,255,255'},${rnd(0.03, 0.08)})`;
+    g.fillRect(X0 + rnd(FW), Y0 + rnd(FH), rnd(1, 2.5), rnd(1, 2.5));
+  }
+  const vg = g.createRadialGradient(W / 2, H / 2, base * 0.2, W / 2, H / 2, Math.hypot(FW, FH) * 0.6);
+  vg.addColorStop(0, 'rgba(255,240,210,.12)'); vg.addColorStop(1, 'rgba(40,20,0,.3)');
+  g.fillStyle = vg; g.fillRect(X0, Y0, FW, FH);
+}
+
+/* ---------- view (what the dying eyes see) ---------- */
+// screen -> floor: inverse of CSS "translate(view) rotate(rot) scale(s)" around the screen centre
+function toFloor(sx, sy) {
+  const cx = W / 2, cy = H / 2, x = sx - cx - view.x, y = sy - cy - view.y;
+  const c = Math.cos(view.rot), s = Math.sin(view.rot);
+  return { x: cx + (x * c + y * s) / view.s, y: cy + (-x * s + y * c) / view.s };
+}
+function lurch(mag) {
+  const a = rnd(Math.PI * 2);
+  view.lvx += Math.cos(a) * mag * 0.1; view.lvy += Math.sin(a) * mag * 0.1;
+}
+function updateView(now) {
+  const p = state === 'play' ? elapsed / T : 0, sw = lvl().sway;
+  const t = now / 1000, ph = view.ph;
+  const A = base * (0.004 + 0.15 * Math.pow(p, 1.4)) * sw;
+  view.A = A;
+  // dizzy spells: the whole floor slides away, then slowly drifts back
+  if (state === 'play' && rnd() < (0.002 + 0.025 * p * p) * sw) lurch(A * rnd(0.6, 1.4));
+  view.lvx *= 0.9; view.lvy *= 0.9;
+  view.lx = view.lx * 0.992 + view.lvx; view.ly = view.ly * 0.992 + view.lvy;
+  view.x = A * (Math.sin(t * 0.53 + ph[0]) * 0.6 + Math.sin(t * 1.27 + ph[1]) * 0.4) + view.lx;
+  view.y = A * (Math.sin(t * 0.47 + ph[2]) * 0.6 + Math.sin(t * 1.09 + ph[3]) * 0.4) + view.ly + base * 0.05 * p * p * sw;
+  view.rot = (Math.sin(t * 0.41 + ph[4]) * 0.7 + Math.sin(t * 0.93 + ph[5]) * 0.3) * (0.004 + 0.12 * Math.pow(p, 1.5)) * sw;
+  view.s = 1.03 + (0.04 * Math.sin(t * 0.7 + ph[0]) + 0.03) * p * sw + 0.012 * pulse;
+  stage.style.transform = `translate(${view.x.toFixed(2)}px,${view.y.toFixed(2)}px) rotate(${view.rot.toFixed(4)}rad) scale(${view.s.toFixed(4)})`;
+}
+
+/* ---------- drawing (floor space) ---------- */
+function extend(x, y, r) {
+  bbox.x0 = Math.min(bbox.x0, x - r); bbox.y0 = Math.min(bbox.y0, y - r);
+  bbox.x1 = Math.max(bbox.x1, x + r); bbox.y1 = Math.max(bbox.y1, y + r);
+}
+function beginStroke(now) {
+  cur = []; strokes.push(cur); last = null;
+  const r = Math.round(rnd(105, 140)), b = Math.round(rnd(8, 20));
+  strokeColor = `rgba(${r},${Math.round(rnd(0, 6))},${b},0.92)`;
+  hand = { x: raw.x, y: raw.y }; lag = 0;
+  const f = toFloor(hand.x, hand.y);
+  addPoint(f.x, f.y, hand.x, hand.y, now);
+}
+function endStroke() {
+  if (last && rnd() < 0.45) spawnDrip(last.x, last.y, rnd(0.6, 1.2));
+  cur = null; last = null;
+}
+function dot(x, y, r, col) {
+  ictx.fillStyle = col; ictx.beginPath(); ictx.arc(x, y, r, 0, Math.PI * 2); ictx.fill();
+}
+// (x,y) = where the ink lands on the floor, (sx,sy) = where you meant it on screen
+function addPoint(x, y, sx, sy, now) {
+  if (!cur) return;
+  x = clamp(x, -M, W + M); y = clamp(y, -M, H + M);
+  view.maxD = Math.max(view.maxD, Math.hypot(x - sx, y - sy));
+  if (!last) {
+    last = { x, y, t: now }; lastMid = { x, y }; curW = brush * 1.15;
+    dot(x, y, curW * 0.55, strokeColor); cur.push({ x, y, sx, sy }); extend(x, y, curW);
+    if (rnd() < 0.5) spawnDrip(x, y, rnd(0.5, 1));
+    return;
+  }
+  const dx = x - last.x, dy = y - last.y, d = Math.hypot(dx, dy);
+  if (d < 1.2) {
+    // pen resting: blood pools & may drip
+    if (now - last.t > 260 && rnd() < 0.04) { spawnDrip(x, y, rnd(0.7, 1.3)); last.t = now; }
+    return;
+  }
+  const dt = Math.max(1, now - last.t), v = d / dt;
+  const vr = v / (base * lvl().speed / 1000);   // 1 = arm at full speed
+  const target = brush * clamp(1.2 - vr * 0.25, 0.9, 1.25);
+  curW += (target - curW) * 0.3;
+  const mid = { x: (last.x + x) / 2, y: (last.y + y) / 2 };
+  ictx.strokeStyle = strokeColor; ictx.lineWidth = curW; ictx.lineCap = 'round'; ictx.lineJoin = 'round';
+  ictx.beginPath(); ictx.moveTo(lastMid.x, lastMid.y); ictx.quadraticCurveTo(last.x, last.y, mid.x, mid.y); ictx.stroke();
+  lastMid = mid; last = { x, y, t: now };
+  cur.push({ x, y, sx, sy }); extend(x, y, curW);
+}
+function spawnDrip(x, y, s) {
+  drips.push({ x, y, w: brush * rnd(0.35, 0.6) * s, life: base * rnd(0.02, 0.09) * s, vy: rnd(0.25, 0.7), col: strokeColor || 'rgba(120,0,10,.92)' });
+}
+function updateDrips() {
+  for (let i = drips.length - 1; i >= 0; i--) {
+    const d = drips[i];
+    const ny = d.y + d.vy * (0.6 + rnd(0.8)), nx = d.x + rnd(-0.15, 0.15);
+    ictx.strokeStyle = d.col; ictx.lineWidth = d.w; ictx.lineCap = 'round';
+    ictx.beginPath(); ictx.moveTo(d.x, d.y); ictx.lineTo(nx, ny); ictx.stroke();
+    d.life -= ny - d.y; d.x = nx; d.y = ny; d.w *= 0.997;
+    extend(nx, ny, d.w);
+    if (d.life <= 0 || ny > H + M) { dot(nx, ny, d.w * 0.75, d.col); drips.splice(i, 1); }
+  }
+}
+
+/* ---------- pen cursor (floor space, so it sits under the finger) ---------- */
+function drawPen() {
+  pctx.clearRect(-M, -M, W + 2 * M, H + 2 * M);
+  if (!(state === 'play' || state === 'ready') || !hasPointer) return;
+  const f = toFloor(down ? hand.x : raw.x, down ? hand.y : raw.y), x = f.x, y = f.y;
+  if (down && lag > brush * 1.5) {
+    // the finger ran ahead: show where you WANT to go, tethered to the slow pen
+    const r = toFloor(raw.x, raw.y);
+    pctx.setLineDash([4, 6]); pctx.strokeStyle = 'rgba(255,255,255,.7)'; pctx.lineWidth = 1.5;
+    pctx.beginPath(); pctx.moveTo(x, y); pctx.lineTo(r.x, r.y); pctx.stroke();
+    pctx.setLineDash([]);
+    pctx.strokeStyle = 'rgba(255,255,255,.8)';
+    pctx.beginPath(); pctx.arc(r.x, r.y, brush * 0.9, 0, Math.PI * 2); pctx.stroke();
+  }
+  if (down) {
+    pctx.fillStyle = 'rgba(150,0,10,.95)';
+    pctx.beginPath(); pctx.arc(x, y, curW * 0.6 + 1, 0, Math.PI * 2); pctx.fill();
+    pctx.strokeStyle = 'rgba(255,255,255,.55)'; pctx.lineWidth = 1.5;
+    pctx.beginPath(); pctx.arc(x, y, curW * 0.6 + 6, 0, Math.PI * 2); pctx.stroke();
+  } else {
+    pctx.strokeStyle = 'rgba(120,0,10,.8)'; pctx.lineWidth = 2;
+    pctx.beginPath(); pctx.arc(x, y, brush * 0.7, 0, Math.PI * 2); pctx.stroke();
+    pctx.fillStyle = 'rgba(120,0,10,.8)';
+    pctx.beginPath(); pctx.arc(x, y, 2, 0, Math.PI * 2); pctx.fill();
+  }
+}
+
+/* ---------- vision effects ---------- */
+function setMsg(t) { msg.style.opacity = 0; setTimeout(() => { msg.textContent = t; msg.style.opacity = 1; }, 200); }
+function renderNoise() {
+  const d = noiseImg.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = Math.random() * 255;
+    d[i] = v; d[i + 1] = v * 0.25; d[i + 2] = v * 0.25; d[i + 3] = 255;
+  }
+  nctx.putImageData(noiseImg, 0, 0);
+}
+function updateFx(now) {
+  const p = elapsed / T, r = 1 - p, sw = lvl().sway;
+  const kDark = Math.pow(p, 1.15);                 // steadily going dark from the first second
+  const k1 = clamp((p - 0.25) / 0.75, 0, 1);       // tunnel vision
+  const k2 = clamp((p - 0.45) / 0.55, 0, 1);       // blur, own ink fading
+  const k3 = clamp((p - 0.75) / 0.25, 0, 1);       // red haze, noise, almost nothing left
+
+  // heartbeat: racing, then failing; late beats knock the view
+  if (elapsed >= nextBeat) {
+    const interval = k3 > 0 ? lerp(0.6, 1.1, k3) : lerp(0.95, 0.6, k1);
+    nextBeat = elapsed + interval;
+    if (p > 0.2) {
+      heartbeat(0.25 + 0.5 * k1 - 0.2 * k3); pulse = 1;
+      if (k1 > 0.3) vib(30);
+      if (p > 0.5) lurch(view.A * 0.5);
+    }
+  }
+  pulse *= 0.9;
+
+  // blackouts: consciousness flickers out for a moment, and the world has moved when it returns
+  if (!blink && p > 0.25 && rnd() < (0.003 + 0.022 * p * p) * sw) {
+    blink = { t: now, d: (0.25 + 0.75 * p) * 1000 };
+    lurch(view.A * 1.5);
+  }
+  let bAmt = 0;
+  if (blink) {
+    const k = (now - blink.t) / blink.d;
+    if (k >= 1) blink = null; else bAmt = Math.pow(Math.sin(Math.PI * k), 0.6);
+  }
+  dark.style.opacity = clamp(0.6 * kDark * Math.min(1, sw + 0.2) + bAmt, 0, 0.98).toFixed(3);
+
+  // tunnel follows where you stare (the pen)
+  const tx = down ? hand.x : W / 2, ty = down ? hand.y : H / 2;
+  tun.x = lerp(tun.x, tx, 0.06); tun.y = lerp(tun.y, ty, 0.06);
+  if (k1 > 0) {
+    const e = k1 * k1 * (3 - 2 * k1);
+    const R = lerp(Math.hypot(W, H) * 0.55, base * 0.09, e) * (1 - 0.08 * pulse);
+    tunnel.style.background =
+      `radial-gradient(circle at ${tun.x}px ${tun.y}px, rgba(0,0,0,0) ${R}px, rgba(12,0,0,${0.55 + 0.3 * k1}) ${R * 1.35 + base * 0.08}px, rgba(4,0,0,${0.85 + 0.15 * k1}) ${R * 1.9 + base * 0.25}px)`;
+  } else tunnel.style.background = 'none';
+
+  stage.style.filter = (k2 > 0 || kDark > 0)
+    ? `blur(${(k2 * 7 + k3 * 5).toFixed(2)}px) saturate(${(1 - 0.5 * kDark + k3 * 0.9).toFixed(3)}) sepia(${(k3 * 0.4).toFixed(3)})`
+    : 'none';
+  ink.style.opacity = (1 - 0.35 * k2 - 0.5 * k3).toFixed(3);
+  pen.style.opacity = (1 - 0.5 * k3).toFixed(3);
+  fog.style.opacity = (0.12 * k1 + 0.75 * k3).toFixed(3);
+  noise.style.opacity = (k3 * 0.5).toFixed(3);
+  if (k3 > 0) {
+    if (frame % 2 === 0) renderNoise();
+    if (tinn) tinn.g.gain.setTargetAtTime(0.004 + 0.03 * k3, AC.currentTime, 0.1);
+    else tinnitus(true);
+  }
+
+  // HUD
+  $('#lifeFill').style.transform = `scaleX(${r})`;
+  $('#timer').textContent = Math.max(0, T - elapsed).toFixed(1);
+  $('#heart').style.transform = `scale(${1 + 0.35 * pulse})`;
+  if (msgPhase === 0 && p > 0.15) { msgPhase = 1; setMsg('目が……かすむ……'); }
+  if (msgPhase === 1 && p >= 0.45) { msgPhase = 2; setMsg('床が……揺れて……'); }
+  if (msgPhase === 2 && p >= 0.75) { msgPhase = 3; setMsg('どこに……書いた……？'); }
+}
+
+/* ---------- flow ---------- */
+function resetGame() {
+  setup();
+  ictx.clearRect(-M, -M, W + 2 * M, H + 2 * M);
+  strokes = []; cur = null; last = null; drips = []; blink = null;
+  bbox = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+  view = { x: 0, y: 0, rot: 0, s: 1, lx: 0, ly: 0, lvx: 0, lvy: 0, ph: Array.from({ length: 6 }, () => rnd(6.28)), A: 0, maxD: 0 };
+  elapsed = 0; nextBeat = 0; pulse = 0; msgPhase = 0; down = false;
+  tun = { x: W / 2, y: H / 2 };
+  stage.style.filter = 'none'; stage.style.transform = 'none';
+  ink.style.opacity = 1; pen.style.opacity = 1; fog.style.opacity = 0; noise.style.opacity = 0; dark.style.opacity = 0;
+  tunnel.style.background = 'none';
+  black.classList.remove('on'); dokun.textContent = ''; dokun.classList.remove('beat');
+  msg.textContent = ''; msg.style.opacity = 1;
+  const st = lvl();
+  T = st.sec;
+  $('#lifeFill').style.transform = 'scaleX(1)'; $('#timer').textContent = T.toFixed(1);
+  $('#stageNo').textContent = st.name;
+  $('#stageType').textContent = `犯人の名前（${st.type}）`;
+  $('#odai2').textContent = odai;
+  $('#stageSec').textContent = st.sec;
+  $('#hudOdai').innerHTML = `${st.name}　犯人<b></b>`;
+  $('#hudOdai b').textContent = odai;
+  $('#slow').classList.remove('on');
+  ready.style.display = 'flex';
+}
+function enterGame() {
+  initAudio();
+  odai = pick(lvl().odai);
+  resetGame();
+  show('game');
+  state = 'ready';
+  hurt.style.transition = 'none'; hurt.style.opacity = '.85'; void hurt.offsetWidth;
+  hurt.style.transition = 'opacity .8s ease-out'; hurt.style.opacity = '0';
+  setTimeout(() => { hurt.style.transition = 'none'; hurt.style.opacity = '0'; }, 900);
+  sfxStab(); vib([60, 40, 120]);
+}
+function startPlay(now) {
+  state = 'play'; t0 = now; ready.style.display = 'none';
+  track('game_start', { stage: stageIdx + 1 });
+  setMsg('犯人の名を……遺さねば……');
+}
+function die() {
+  state = 'dying';
+  result = null;
+  if (cur) endStroke();
+  down = false;
+  tinnitus(false);
+  msg.style.opacity = 0;
+  $('#slow').classList.remove('on');
+  black.classList.add('on');
+  const beat = (txt, vol) => {
+    heartbeat(vol); vib([80, 160, 60]);
+    dokun.textContent = txt; dokun.classList.add('beat');
+    setTimeout(() => dokun.classList.remove('beat'), 380);
+  };
+  setTimeout(() => beat('ドクン……', 1.0), 250);
+  setTimeout(() => beat('ドクン……', 0.75), 1650);
+  setTimeout(() => beat('……ドクン', 0.35), 3250);
+  setTimeout(() => { dokun.style.transition = 'opacity 1.2s'; dokun.textContent = '（息絶えた）'; dokun.style.opacity = .5; }, 4300);
+  setTimeout(() => { buildResult(); }, 4400);
+  setTimeout(() => sfxFlashCharge(), 5600);
+  setTimeout(() => {
+    dokun.style.opacity = ''; dokun.style.transition = '';
+    sfxShutter(); vib(40);
+    flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+    revealResult();
+  }, 6200);
+}
+
+/* ---------- analysis ---------- */
+// case verdict by score: [min, headline, sub, comments, solved?]
+const VERDICTS = [
+  [0, '手がかり無し', '事件は迷宮入りしました', false, [
+    '警察は解読を諦めました。', '鑑識は「床の汚れ」として処理しました。', '捜査会議で「これは何だ」と30分揉めました。', '犯人は今日もぐっすり眠っています。']],
+  [25, '捜査難航', '容疑者すら絞れていません', false, [
+    '刑事が三日三晩、血文字とにらめっこしています。', '「名前…のような何か」として記録されました。', '容疑者全員が「自分じゃない」と主張しています。', '別の事件の犯人が誤って逮捕されました。']],
+  [45, '有力な手がかり', '容疑者が数人に絞られました', false, [
+    '数文字が読み取れ、容疑者が3人に絞られました。', '警部が「…読めなくはない」と呟きました。', '捜査本部に希望の光が差しました。', '犯人が少しだけ落ち着かなくなってきました。']],
+  [65, '容疑者特定', '任意同行を求めています', true, [
+    '名前を見た犯人の顔色が変わりました。', '刑事が「よくやった…」と天を仰ぎました。', '容疑者の家に捜査員が向かっています。', '犯人のアリバイが崩れ始めました。']],
+  [85, '犯人逮捕確実', '逮捕状が請求されました', true, [
+    '逮捕状が即日発行されました。', '犯人が血文字を見て、その場で自白しました。', '死してなお、犯人を追い詰めました。', '刑事たちがあなたの遺志に敬礼しました。']],
+];
+const verdictOf = s => { let v = VERDICTS[0]; for (const x of VERDICTS) if (s >= x[0]) v = x; return v; };
+const GUESS_LO = ['「カレーうどん」', '「明日は燃えるゴミ」', '古代文字の一種', '「たぶん、左」', '地図（宝のありか？）', '「ア」または猫の後ろ姿', '福笑い（失敗）'];
+// partially decoded name: each character survives with a chance tied to the score
+function partialName(name, score) {
+  return [...name].map(ch => rnd() < score / 100 + 0.1 ? ch : '？').join('');
+}
+
+function meanOf(pts) {
+  const m = { fx: 0, fy: 0, sx: 0, sy: 0 };
+  for (const q of pts) { m.fx += q.x; m.fy += q.y; m.sx += q.sx; m.sy += q.sy; }
+  const n = pts.length || 1;
+  m.fx /= n; m.fy /= n; m.sx /= n; m.sy /= n;
+  return m;
+}
+// average gap between "where you meant it" (screen) and "where it landed" (floor), after aligning centres
+function misplace(pts) {
+  const m = meanOf(pts); let d = 0;
+  for (const q of pts) d += Math.hypot((q.x - m.fx) - (q.sx - m.sx), (q.y - m.fy) - (q.sy - m.sy));
+  return d / (pts.length || 1);
+}
+function analyze() {
+  let total = 0, count = 0, shapeDev = 0, shapeN = 0;
+  const all = [];
+  for (const s of strokes) {
+    if (!s.length) continue;
+    count++;
+    for (let i = 1; i < s.length; i++) total += Math.hypot(s[i].x - s[i - 1].x, s[i].y - s[i - 1].y);
+    if (s.length >= 3) { shapeDev += misplace(s) * s.length; shapeN += s.length; }
+    for (const q of s) all.push(q);
+  }
+  const shapeS = shapeN ? clamp(1 - shapeDev / shapeN / base / 0.03, 0, 1) : 0;   // strokes bent by the swaying view
+  const placeS = all.length ? clamp(1 - misplace(all) / base / 0.09, 0, 1) : 0;  // strokes landed in the wrong place
+  const lenS = clamp(total / (base * lvl().len), 0, 1);
+  // too few strokes for the name (e.g. one straight line) can't be calligraphy
+  const strokeS = clamp(count / lvl().strokes, 0, 1);
+  let score = Math.round(100 * (shapeS * 0.35 + placeS * 0.45 + lenS * 0.2) * (0.35 + 0.65 * strokeS));
+  if (total < base * 0.15) score = Math.min(score, 3);
+  if (!count) score = 0;
+  score = clamp(score, 0, 100);
+
+  const [, verdict, vSub, solved, comments] = verdictOf(score);
+  const comment = count ? pick(comments) : '何も書かずに息絶えました。犯人は安堵しています。';
+  const conf = clamp(Math.round(score * rnd(0.8, 1.1)), 1, 99);
+  const guess = !count ? '（何も書かれていない）'
+    : score >= 85 ? `「${odai}」と判読（信頼度 ${conf}%）`
+    : score >= 25 ? `「${partialName(odai, score)}」まで判読（信頼度 ${conf}%）`
+    : `${pick(GUESS_LO)}と推定（信頼度 ${conf}%）`;
+  return {
+    score, comment, guess, count, total, verdict, vSub, solved,
+    shape: Math.round(shapeS * 100), place: Math.round(placeS * 100),
+    cm: (total / 37.8).toFixed(1), driftCm: (view.maxD / 37.8).toFixed(1),
+    no: String(Math.floor(rnd(1000, 9999))), odai,
+    stageIdx, stageName: lvl().name, stageType: lvl().type, sec: lvl().sec,
+    date: new Date(),
+  };
+}
+
+/* evidence crop: full picture of what you wrote */
+function makeEvidence() {
+  const AR = 1080 / 680;
+  let x0, y0, x1, y1;
+  if (isFinite(bbox.x0)) {
+    const pad = base * 0.07;
+    x0 = bbox.x0 - pad; y0 = bbox.y0 - pad; x1 = bbox.x1 + pad; y1 = bbox.y1 + pad;
+  } else { x0 = W * 0.25; y0 = H * 0.25; x1 = W * 0.75; y1 = H * 0.75; }
+  let cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  let w = Math.max(x1 - x0, base * 0.45), h = Math.max(y1 - y0, base * 0.3);
+  if (w / h < AR) w = h * AR; else h = w / AR;
+  const FW = W + 2 * M, FH = H + 2 * M; // the whole floor, including what drifted off-screen
+  if (w > FW) { w = FW; h = Math.min(FH, w / AR); }
+  if (h > FH) { h = FH; w = Math.min(FW, h * AR); }
+  cx = clamp(cx, -M + w / 2, W + M - w / 2); cy = clamp(cy, -M + h / 2, H + M - h / 2);
+  const sx = cx - w / 2 + M, sy = cy - h / 2 + M; // canvas pixel space starts at -M
+  const scale = Math.min(DPR, 1400 / w);
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * scale); c.height = Math.round(h * scale);
+  const g = c.getContext('2d');
+  g.drawImage(bg, sx * DPR, sy * DPR, w * DPR, h * DPR, 0, 0, c.width, c.height);
+  g.drawImage(ink, sx * DPR, sy * DPR, w * DPR, h * DPR, 0, 0, c.width, c.height);
+  // forensic photo lighting
+  const lg = g.createRadialGradient(c.width * .45, c.height * .4, 0, c.width / 2, c.height / 2, Math.hypot(c.width, c.height) * .6);
+  lg.addColorStop(0, 'rgba(255,255,255,.12)'); lg.addColorStop(1, 'rgba(0,0,0,.18)');
+  g.fillStyle = lg; g.fillRect(0, 0, c.width, c.height);
+  return c;
+}
+
+function wrapText(g, text, maxW) {
+  const lines = []; let line = '';
+  for (const ch of text) {
+    if (g.measureText(line + ch).width > maxW && line) {
+      if ('。、」）'.includes(ch)) { line += ch; lines.push(line); line = ''; continue; }
+      lines.push(line); line = ch;
+    } else line += ch;
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+function drawMarker(g, x, y, s, label) {
+  g.save(); g.translate(x, y);
+  g.fillStyle = 'rgba(0,0,0,.35)'; g.beginPath(); g.ellipse(s * .55, s * 1.02, s * .7, s * .12, 0, 0, 7); g.fill();
+  g.fillStyle = '#f7c600'; g.beginPath(); g.moveTo(0, s); g.lineTo(s * .22, 0); g.lineTo(s * .9, 0); g.lineTo(s * 1.1, s); g.closePath(); g.fill();
+  g.fillStyle = '#d9a800'; g.beginPath(); g.moveTo(s * .9, 0); g.lineTo(s * 1.1, s); g.lineTo(s * 1.25, s * .92); g.lineTo(s * 1.0, 0); g.closePath(); g.fill();
+  g.fillStyle = '#111'; g.font = `900 ${s * .55}px "Zen Kaku Gothic New",sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(label, s * .55, s * .55);
+  g.restore();
+}
+function makeCard(ev, res) {
+  const c = document.createElement('canvas'); c.width = 1200; c.height = 1200;
+  const g = c.getContext('2d');
+  const BR = '"Yuji Syuku","Hiragino Mincho ProN","Yu Mincho",serif', SA = '"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif';
+  g.fillStyle = '#f4f1ea'; g.fillRect(0, 0, 1200, 1200);
+  g.strokeStyle = 'rgba(30,40,60,.06)'; g.lineWidth = 1;
+  for (let i = 0; i <= 1200; i += 40) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 1200); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(1200, i); g.stroke(); }
+  // header
+  g.fillStyle = '#1b2130'; g.fillRect(0, 0, 1200, 124);
+  g.fillStyle = '#c3121d'; g.fillRect(0, 124, 1200, 6);
+  g.textBaseline = 'middle'; g.textAlign = 'left';
+  g.fillStyle = '#fff'; g.font = `46px ${BR}`; g.fillText('ダイイングメッセージ鑑定書', 50, 64);
+  g.textAlign = 'right'; g.font = `700 22px ${SA}`;
+  g.fillStyle = '#ffd23a'; g.fillText(`${res.stageName}（${res.sec}秒）　証拠品 No.${res.no}`, 1150, 46);
+  g.fillStyle = '#9aa3b8'; g.font = `500 22px ${SA}`; g.fillText('鑑識課 第七係 ／ 機械判定', 1150, 86);
+  // photo
+  const px = 60, py = 170, pw = 1080, ph = 680;
+  g.save(); g.shadowColor = 'rgba(20,25,40,.35)'; g.shadowBlur = 30; g.shadowOffsetY = 10;
+  g.fillStyle = '#fff'; g.fillRect(px - 14, py - 14, pw + 28, ph + 28); g.restore();
+  g.fillStyle = '#2a2622'; g.fillRect(px, py, pw, ph);
+  const s = Math.min(pw / ev.width, ph / ev.height), dw = ev.width * s, dh = ev.height * s;
+  g.drawImage(ev, px + (pw - dw) / 2, py + (ph - dh) / 2, dw, dh);
+  drawMarker(g, px + 22, py + ph - 92, 72, '1');
+  // tape
+  g.fillStyle = 'rgba(255,228,130,.8)';
+  g.save(); g.translate(px + 60, py - 6); g.rotate(-.12); g.fillRect(-60, -16, 120, 32); g.restore();
+  g.save(); g.translate(px + pw - 60, py - 6); g.rotate(.1); g.fillRect(-60, -16, 120, 32); g.restore();
+  // ruler
+  const ry = py + ph + 14 + 12;
+  g.fillStyle = '#fff'; g.fillRect(px, ry, 420, 30); g.strokeStyle = '#1b2130'; g.lineWidth = 2; g.strokeRect(px, ry, 420, 30);
+  for (let i = 0; i <= 20; i++) { g.fillStyle = '#1b2130'; g.fillRect(px + i * 21, ry, 2, i % 5 === 0 ? 18 : 10); }
+  g.textAlign = 'left'; g.font = `500 18px ${SA}`; g.fillStyle = '#556'; g.fillText('現場床面に遺された血文字（全貌）', px + 440, ry + 16);
+  // score
+  const sy = 960;
+  g.fillStyle = '#556'; g.font = `700 28px ${SA}`; g.textAlign = 'left'; g.fillText('解読率', 60, sy);
+  g.fillStyle = '#c3121d'; g.font = `900 150px ${SA}`; g.textBaseline = 'alphabetic';
+  const num = String(res.score); g.fillText(num, 52, sy + 160);
+  const nw = g.measureText(num).width;
+  g.font = `900 60px ${SA}`; g.fillText('%', 58 + nw, sy + 160);
+  g.fillStyle = '#e2dccf'; g.fillRect(60, sy + 182, 440, 16);
+  g.fillStyle = '#c3121d'; g.fillRect(60, sy + 182, 440 * res.score / 100, 16);
+  // stamp
+  g.save(); g.translate(470, sy + 70); g.rotate(-0.25); g.globalAlpha = .85;
+  g.strokeStyle = '#d0101c'; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 62, 0, 7); g.stroke();
+  g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 54, 0, 7); g.stroke();
+  g.fillStyle = '#d0101c'; g.font = `30px ${BR}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(res.solved ? '逮捕' : '未解決', 0, 2);
+  g.restore();
+  // case verdict (no decoded name here: the card is for others to solve)
+  const cx = 580, cw = 560, vcol = res.solved ? '#c3121d' : '#4a5468';
+  g.textAlign = 'left'; g.textBaseline = 'middle';
+  g.fillStyle = vcol; g.fillRect(cx, sy - 16, 6, 190);
+  g.fillStyle = '#556'; g.font = `700 22px ${SA}`; g.fillText('捜査結果', cx + 24, sy);
+  g.fillStyle = vcol; g.font = `58px ${BR}`; g.fillText(res.verdict, cx + 24, sy + 54);
+  g.fillStyle = '#1b2130'; g.font = `26px ${BR}`;
+  wrapText(g, res.comment, cw - 30).slice(0, 2).forEach((l, i) => g.fillText(l, cx + 24, sy + 116 + i * 34));
+  // footer
+  g.fillStyle = '#1b2130'; g.fillRect(0, 1160, 1200, 40);
+  g.fillStyle = '#fff'; g.font = `700 20px ${SA}`; g.textAlign = 'center';
+  g.fillText('#ダイイングカリグラフィー　─　警察（みんな）、解読してください', 600, 1181);
+  return c;
+}
+
+
+const FONT_TEXT = 'ダイイングメッセージ鑑定書証拠品鑑識課第七係機械判定現場床面に遺された血文字全貌達筆度鑑定済鑑識コメントAI解読警察みんな解読してください' +
+  '#第一二最後の事件秒連続総合最終報告称号0123456789%（）／─No.解読率捜査結果逮捕未解決全員件迷宮入り' +
+  VERDICTS.map(v => v[1]).join('');
+async function loadFonts(texts) {
+  try {
+    await Promise.race([
+      Promise.all([
+        document.fonts.load('52px "Yuji Syuku"', texts),
+        document.fonts.load('900 150px "Zen Kaku Gothic New"', texts),
+        document.fonts.load('700 26px "Zen Kaku Gothic New"', texts),
+        document.fonts.load('500 20px "Zen Kaku Gothic New"', texts),
+      ]),
+      new Promise(r => setTimeout(r, 1500)),
+    ]);
+  } catch (e) {}
+}
+
+async function buildResult() {
+  const r = analyze();
+  evCanvas = makeEvidence();
+  await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub);
+  cardCanvas = makeCard(evCanvas, r);
+  stageResults[stageIdx] = { res: r, ev: evCanvas, evUrl: evCanvas.toDataURL('image/jpeg', 0.9) };
+  $('#evImg').src = stageResults[stageIdx].evUrl;
+  $('#cardImg').src = cardCanvas.toDataURL('image/png');
+  setShare(cardCanvas, stageShareText(r), `dying-message-${r.no}.png`);
+  result = r;
+}
+
+function countUp(numEl, meterEl, stampEl, commentEl, score, delay) {
+  commentEl.classList.remove('on'); stampEl.classList.remove('on');
+  numEl.textContent = '0'; meterEl.style.width = '0';
+  setTimeout(() => {
+    meterEl.style.width = score + '%';
+    const t0 = performance.now(), dur = 1300;
+    const step = now => {
+      const k = clamp((now - t0) / dur, 0, 1), e = 1 - Math.pow(1 - k, 3);
+      numEl.textContent = Math.round(score * e);
+      if (k < 1) requestAnimationFrame(step);
+      else {
+        stampEl.classList.add('on');
+        if (AC) { const t = AC.currentTime; noiseHit(t + .12, .12, 'lowpass', 500, .8); thump(t + .12, .5); }
+        setTimeout(() => commentEl.classList.add('on'), 300);
+      }
+    };
+    requestAnimationFrame(step);
+  }, delay);
+}
+
+// the headline at the top of the result: slammed on like a stamp just after the flash
+function showVerdict(box, textEl, subEl, text, sub, solved) {
+  textEl.textContent = text; subEl.textContent = sub;
+  box.classList.toggle('cold', !solved);
+  box.classList.remove('on');
+  setTimeout(() => {
+    void box.offsetWidth; box.classList.add('on');
+    if (AC) { const t = AC.currentTime; noiseHit(t + .05, .14, 'lowpass', 420, .9); thump(t + .05, solved ? .8 : .45); }
+    vib(solved ? [60, 40, 60] : 40);
+  }, 500);
+}
+
+function revealResult() {
+  if (!result) { setTimeout(revealResult, 200); return; }
+  state = 'result';
+  const r = result, d = r.date;
+  $('#rBadge').textContent = `鑑識課 第七係 ／ ${r.stageName}`;
+  $('#caseInfo').innerHTML = `事件番号 ${d.getFullYear()}-${r.no}<br>${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} 撮影`;
+  $('#evCap').textContent = `証拠品 No.${r.no}：現場床面に遺された血文字（全貌）`;
+  $('#stSteady').textContent = r.count ? r.shape + '%' : '-';
+  $('#stLen').textContent = r.count ? r.place + '%' : '-';
+  $('#stCount').textContent = `${r.count}画（約${r.cm}cm）`;
+  $('#stShake').textContent = `約${r.driftCm}cm`;
+  $('#stGuess').textContent = r.guess;
+  $('#stOdai').textContent = `「${r.odai}」（${r.stageType}）`;
+  $('#comment').textContent = r.comment;
+  $('#stamp').textContent = r.solved ? '逮捕' : '未解決';
+  showVerdict($('#verdict'), $('#vText'), $('#vSub'), r.verdict, r.vSub, r.solved);
+  track('stage_end', { stage: stageIdx + 1, score: r.score, verdict: r.verdict, solved: r.solved });
+  const nx = STAGES[stageIdx + 1];
+  $('#btnNext').textContent = nx ? `${nx.name}へ ▶（${nx.type}・${nx.sec}秒）` : '最終鑑定へ ▶';
+  document.querySelectorAll('.note').forEach(n => n.textContent = '');
+  show('result'); scr.result.scrollTop = 0;
+  const evEl = $('#evidence'); evEl.classList.remove('reveal'); void evEl.offsetWidth; evEl.classList.add('reveal');
+  countUp($('#scoreNum'), $('#meterFill'), $('#stamp'), $('#comment'), r.score, 900);
+}
+
+/* ---------- final verdict ---------- */
+// overall outcome = how many of the 3 culprits were caught
+const FINALS = [
+  ['全事件 迷宮入り', '犯人は3人とも野放しです', '3人の犯人は、今夜も祝杯をあげています。'],
+  ['1件 逮捕', '残る2人の犯人は逃走中', '1人は捕まりました。残る2人はまだ高笑いしています。'],
+  ['2件 逮捕', 'あと1人、取り逃がしました', 'あと1人。あなたの血文字は無駄になりませんでした。'],
+  ['全員逮捕', '3事件とも完全解決', '3つの命と引き換えに、正義は果たされました。'],
+];
+
+function makeFinalCard(list, total, rank, rcom, no) {
+  const c = document.createElement('canvas'); c.width = 1200; c.height = 1200;
+  const g = c.getContext('2d');
+  const BR = '"Yuji Syuku","Hiragino Mincho ProN","Yu Mincho",serif', SA = '"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif';
+  g.fillStyle = '#f4f1ea'; g.fillRect(0, 0, 1200, 1200);
+  g.strokeStyle = 'rgba(30,40,60,.06)'; g.lineWidth = 1;
+  for (let i = 0; i <= 1200; i += 40) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 1200); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(1200, i); g.stroke(); }
+  g.fillStyle = '#1b2130'; g.fillRect(0, 0, 1200, 124);
+  g.fillStyle = '#c3121d'; g.fillRect(0, 124, 1200, 6);
+  g.textBaseline = 'middle'; g.textAlign = 'left';
+  g.fillStyle = '#fff'; g.font = `46px ${BR}`; g.fillText('連続ダイイングメッセージ事件', 50, 64);
+  g.textAlign = 'right'; g.font = `700 22px ${SA}`;
+  g.fillStyle = '#ffd23a'; g.fillText('最終鑑定書　No.' + no, 1150, 46);
+  g.fillStyle = '#9aa3b8'; g.font = `500 22px ${SA}`; g.fillText('鑑識課 第七係 ／ 機械判定', 1150, 86);
+  list.forEach((x, i) => {
+    const r = x.res, y = 152 + i * 284, pw = 432, ph = 268, px = 60;
+    g.save(); g.shadowColor = 'rgba(20,25,40,.3)'; g.shadowBlur = 18; g.shadowOffsetY = 6;
+    g.fillStyle = '#fff'; g.fillRect(px - 8, y - 8, pw + 16, ph + 16); g.restore();
+    g.fillStyle = '#2a2622'; g.fillRect(px, y, pw, ph);
+    const s = Math.min(pw / x.ev.width, ph / x.ev.height), dw = x.ev.width * s, dh = x.ev.height * s;
+    g.drawImage(x.ev, px + (pw - dw) / 2, y + (ph - dh) / 2, dw, dh);
+    drawMarker(g, px + 10, y + ph - 46, 38, String(i + 1));
+    const tx = 530;
+    g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+    g.fillStyle = '#1b2130'; g.font = `36px ${BR}`; g.fillText(r.stageName, tx, y + 44);
+    g.fillStyle = '#667'; g.font = `500 20px ${SA}`; g.fillText(`${r.stageType}・${r.sec}秒`, tx + 200, y + 42);
+    g.fillStyle = '#c3121d'; g.font = `900 96px ${SA}`;
+    const num = String(r.score); g.fillText(num, tx - 4, y + 148);
+    const nw = g.measureText(num).width; g.font = `900 40px ${SA}`; g.fillText('%', tx + nw, y + 148);
+    g.fillStyle = '#e2dccf'; g.fillRect(tx, y + 164, 600, 10);
+    g.fillStyle = '#c3121d'; g.fillRect(tx, y + 164, 600 * r.score / 100, 10);
+    g.fillStyle = r.solved ? '#c3121d' : '#4a5468'; g.font = `34px ${BR}`;
+    g.fillText(r.verdict, tx, y + 216);
+    g.fillStyle = '#1b2130'; g.font = `22px ${BR}`;
+    g.fillText(wrapText(g, r.comment, 600)[0], tx, y + 254);
+  });
+  // total
+  const by = 1010;
+  g.fillStyle = '#1b2130'; g.fillRect(60, by - 8, 1080, 3);
+  g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.fillStyle = '#556'; g.font = `700 24px ${SA}`; g.fillText('総合解読率', 60, by + 32);
+  g.fillStyle = '#c3121d'; g.font = `900 104px ${SA}`;
+  const tn = String(total); g.fillText(tn, 52, by + 138);
+  const tw = g.measureText(tn).width; g.font = `900 46px ${SA}`; g.fillText('%', 58 + tw, by + 138);
+  g.fillStyle = '#556'; g.font = `700 22px ${SA}`; g.fillText('最終捜査結果', 400, by + 32);
+  g.fillStyle = rank.includes('逮捕') ? '#c3121d' : '#4a5468'; g.font = `54px ${BR}`; g.fillText(rank, 400, by + 92);
+  g.fillStyle = '#445'; g.font = `21px ${BR}`;
+  wrapText(g, rcom, 720).slice(0, 2).forEach((l, k) => g.fillText(l, 400, by + 124 + k * 24));
+  g.save(); g.translate(1090, by + 64); g.rotate(-0.25); g.globalAlpha = .85;
+  g.strokeStyle = '#d0101c'; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 54, 0, 7); g.stroke();
+  g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 46, 0, 7); g.stroke();
+  g.fillStyle = '#d0101c'; g.font = `24px ${BR}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('最終', 0, -13); g.fillText('鑑定', 0, 15);
+  g.restore();
+  g.fillStyle = '#1b2130'; g.fillRect(0, 1160, 1200, 40);
+  g.fillStyle = '#fff'; g.font = `700 20px ${SA}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('#ダイイングカリグラフィー　─　警察（みんな）、全部解読できますか？', 600, 1181);
+  return c;
+}
+
+async function showFinal() {
+  const list = stageResults.filter(Boolean);
+  const total = Math.round(list.reduce((a, x) => a + x.res.score, 0) / STAGES.length);
+  const arrests = list.filter(x => x.res.solved).length;
+  const [rank, rsub, rcom] = FINALS[clamp(arrests, 0, 3)];
+  const no = String(Math.floor(rnd(1000, 9999)));
+  await loadFonts(FONT_TEXT + rank + rsub + rcom + list.map(x => x.res.comment).join(''));
+  const card = makeFinalCard(list, total, rank, rcom, no);
+  const fl = $('#fList'); fl.innerHTML = '';
+  for (const x of list) {
+    const r = x.res, el = document.createElement('div');
+    el.className = 'f-item';
+    el.innerHTML = '<img><div><div class="lab"></div><div class="vd"></div><div class="sc"><span></span><small>%</small></div><div class="od">犯人 <b></b></div><div class="cm"></div></div>';
+    el.querySelector('.vd').textContent = r.verdict;
+    el.querySelector('.vd').classList.toggle('cold', !r.solved);
+    el.querySelector('img').src = x.evUrl; el.querySelector('img').alt = r.stageName + 'の血文字';
+    el.querySelector('.lab').innerHTML = `${r.stageName}<small>${r.stageType}・${r.sec}秒</small>`;
+    el.querySelector('.sc span').textContent = r.score;
+    el.querySelector('.od b').textContent = `「${r.odai}」`;
+    el.querySelector('.cm').textContent = r.comment;
+    fl.appendChild(el);
+  }
+  $('#fCase').innerHTML = `事件番号 ${new Date().getFullYear()}-${no}<br>連続${list.length}件`;
+  $('#fComment').textContent = rcom;
+  showVerdict($('#fVerdict'), $('#fvText'), $('#fvSub'), rank, `${rsub}（逮捕 ${arrests}／${list.length}件）`, arrests > 0);
+  track('game_clear', { total, arrests });
+  $('#fCardImg').src = card.toDataURL('image/png');
+  setShare(card, finalShareText(total, rank), `dying-message-final-${no}.png`);
+  document.querySelectorAll('.note').forEach(n => n.textContent = '');
+  state = 'final';
+  show('final'); scr.final.scrollTop = 0;
+  countUp($('#fScore'), $('#fMeter'), $('#fStamp'), $('#fComment'), total, 400);
+}
+
+/* ---------- share ---------- */
+function toast(t) {
+  const el = $('#toast'); el.textContent = t; el.classList.add('on');
+  clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('on'), 3800);
+}
+const withUrl = t => /^https?:/.test(location.protocol) ? t + '\n' + location.href.split(/[?#]/)[0] : t;
+function stageShareText(r) {
+  return withUrl(`${r.stageName}（${r.stageType}・${r.sec}秒）で、瀕死の私が遺したダイイングメッセージ。\n捜査結果【${r.verdict}】解読率 ${r.score}%\n警察（みんな）、犯人の名前を解読してください🩸\n#ダイイングカリグラフィー`);
+}
+function finalShareText(total, rank) {
+  return withUrl(`3つの事件で、瀕死の私が遺したダイイングメッセージ。\n最終捜査結果【${rank}】総合解読率 ${total}%\n警察（みんな）、3人の犯人の名前を解読できますか？🩸\n#ダイイングカリグラフィー`);
+}
+function setShare(canvas, text, name) {
+  const ctx = { canvas, blob: null, text, name };
+  shareCtx = ctx;
+  canvas.toBlob(b => { ctx.blob = b; }, 'image/png');
+}
+function downloadCard() {
+  const s = shareCtx, a = document.createElement('a');
+  a.download = s.name;
+  a.href = s.blob ? URL.createObjectURL(s.blob) : s.canvas.toDataURL('image/png');
+  document.body.appendChild(a); a.click(); a.remove();
+  if (s.blob) setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function shareX() {
+  const s = shareCtx;
+  if (!s) return;
+  track('share_x', { screen: state });
+  const isTouch = matchMedia('(pointer:coarse)').matches;
+  // Mobile: native share sheet with the image attached (pick X there)
+  if (isTouch && s.blob && navigator.canShare) {
+    const file = new File([s.blob], s.name, { type: 'image/png' });
+    if (navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file], text: s.text }).catch(err => {
+        if (err && err.name !== 'AbortError') openIntent(s);
+      });
+      return;
+    }
+  }
+  openIntent(s);
+}
+function openIntent(s) {
+  const url = 'https://x.com/intent/post?text=' + encodeURIComponent(s.text);
+  const w = window.open(url, '_blank', 'noopener');
+  if (!w) location.href = url;
+  let copied = false;
+  try {
+    if (s.blob && navigator.clipboard && window.ClipboardItem) {
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': s.blob })]).then(() => {
+        copied = true; toast('カード画像をコピー＆保存しました。投稿画面で貼り付け（Ctrl/⌘+V）または添付してください');
+      }).catch(() => {});
+    }
+  } catch (e) {}
+  downloadCard();
+  setTimeout(() => { if (!copied) toast('カード画像を保存しました。投稿画面で画像を添付してください'); }, 400);
+  const note = document.querySelector('.screen.active .note');
+  if (note) note.textContent = '画像は自動で保存されています。Xの投稿画面に添付して、みんなに解読してもらおう。';
+}
+
+/* =====================================================
+   RED FREE GAMES 共通（他のゲーム・要望フォーム・アクセス解析）
+===================================================== */
+const SITE_URL = 'https://red-freegames.github.io/';
+// 要望・バグ報告フォーム（共通のGoogleフォーム）。「対象のゲーム」に同じ名前の選択肢を追加すると選択済みで開く
+const GAME_NAME = 'ダイイング・カリグラフィー';
+const FEEDBACK_VIEW = 'https://docs.google.com/forms/d/e/1FAIpQLSfJ2DevI46AJiB_kUAmPGOvckFRqzzSP_iCVd5qiikxr9SIOg/viewform';
+['fbTitle', 'fbResult', 'fbFinal'].forEach(id => {
+  $('#' + id).href = `${FEEDBACK_VIEW}?usp=pp_url&entry.2056875219=${encodeURIComponent(GAME_NAME)}`;
+});
+// アクセス解析（Googleアナリティクス4）。本番（github.io）でだけ計測し、画面には何も出さない
+const GA_ID = 'G-FC7LD0DJTQ';
+(function initAnalytics() {
+  if (!GA_ID || !/\.github\.io$/.test(location.hostname)) return;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { dataLayer.push(arguments); };
+  gtag('js', new Date()); gtag('config', GA_ID, { page_title: GAME_NAME });
+  const s = document.createElement('script'); s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_ID);
+  document.head.appendChild(s);
+})();
+// ゲーム内の出来事を記録する（失敗しても遊びには影響させない）
+function track(name, params) { try { if (window.gtag) gtag('event', name, params || {}); } catch (e) {} }
+
+/* ---------- input ---------- */
+function setRaw(e) { raw.x = e.clientX; raw.y = e.clientY; hasPointer = true; }
+game.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  setRaw(e);
+  if (state === 'ready') { initAudio(); startPlay(performance.now()); }
+  if (state !== 'play') return;
+  try { game.setPointerCapture(e.pointerId); } catch (err) {}
+  down = true;
+  beginStroke(performance.now());
+});
+game.addEventListener('pointermove', setRaw);
+const up = e => {
+  if (e.pointerType !== 'mouse') hasPointer = false;
+  if (!down) return;
+  down = false; lag = 0; if (state === 'play') endStroke();
+};
+game.addEventListener('pointerup', up);
+game.addEventListener('pointercancel', up);
+game.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { hasPointer = false; } });
+game.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('touchmove', e => { if (state === 'play' || state === 'ready') e.preventDefault(); }, { passive: false });
+
+$('#btnStart').addEventListener('click', () => { stageIdx = 0; stageResults = []; enterGame(); });
+$('#btnRetry').addEventListener('click', () => enterGame());
+$('#btnNext').addEventListener('click', () => {
+  if (stageIdx < STAGES.length - 1) { stageIdx++; enterGame(); } else showFinal();
+});
+$('#btnRestart').addEventListener('click', () => { stageIdx = 0; stageResults = []; enterGame(); });
+$('#btnTitle').addEventListener('click', () => { state = 'title'; show('title'); });
+document.querySelectorAll('.btnX').forEach(b => b.addEventListener('click', shareX));
+document.querySelectorAll('.btnSave').forEach(b => b.addEventListener('click', () => { if (shareCtx) { downloadCard(); toast('カード画像を保存しました'); } }));
+window.addEventListener('resize', () => { if (state === 'ready') resetGame(); });
+
+/* ---------- main loop ---------- */
+function loop(now) {
+  requestAnimationFrame(loop);
+  frame++;
+  const dt = clamp((now - lastFrame) / 1000, 0, 0.05); lastFrame = now;
+  if (state === 'play') {
+    elapsed = (now - t0) / 1000;
+    if (elapsed >= T) { elapsed = T; updateFx(now); die(); }
+  }
+  if (state === 'play' || state === 'ready') {
+    updateView(now);
+    if (down && state === 'play') {
+      // the dying arm can only move so fast: it chases the finger at a capped speed
+      const step = base * lvl().speed * dt;
+      const dx = raw.x - hand.x, dy = raw.y - hand.y, d = Math.hypot(dx, dy);
+      if (d > step) { hand.x += dx / d * step; hand.y += dy / d * step; lag = d - step; }
+      else { hand.x = raw.x; hand.y = raw.y; lag = 0; }
+      // you aim at a spot on the screen, but the swaying floor puts the ink somewhere else
+      const f = toFloor(hand.x, hand.y);
+      addPoint(f.x, f.y, hand.x, hand.y, now);
+    } else lag = 0;
+    $('#slow').classList.toggle('on', state === 'play' && lag > base * 0.15);
+  }
+  if (drips.length) updateDrips();
+  drawPen();
+  if (state === 'play') updateFx(now);
+}
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
