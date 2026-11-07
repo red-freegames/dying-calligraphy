@@ -356,6 +356,11 @@ const STAGES = [
 ];
 let stageIdx = 0, T = STAGES[0].sec, stageResults = [];
 const lvl = () => STAGES[stageIdx];
+// a finger writes far more naturally than a mouse, so touch play gets a heavier handicap
+const TOUCH = { sway: 1.4, speed: 0.8 };
+let touchMode = matchMedia("(pointer: coarse)").matches;
+const swayOf = () => lvl().sway * (touchMode ? TOUCH.sway : 1);
+const speedOf = () => lvl().speed * (touchMode ? TOUCH.speed : 1);
 
 /* ---------- elements ---------- */
 const scr = { title: $('#title'), game: $('#game'), result: $('#result'), final: $('#final') };
@@ -518,7 +523,7 @@ function lurch(mag) {
   view.lvx += Math.cos(a) * mag * 0.1; view.lvy += Math.sin(a) * mag * 0.1;
 }
 function updateView(now) {
-  const p = state === 'play' ? elapsed / T : 0, sw = lvl().sway;
+  const p = state === 'play' ? elapsed / T : 0, sw = swayOf();
   const t = now / 1000, ph = view.ph;
   const A = base * (0.004 + 0.15 * Math.pow(p, 1.4)) * sw;
   view.A = A;
@@ -571,7 +576,7 @@ function addPoint(x, y, sx, sy, now) {
     return;
   }
   const dt = Math.max(1, now - last.t), v = d / dt;
-  const vr = v / (base * lvl().speed / 1000);   // 1 = arm at full speed
+  const vr = v / (base * speedOf() / 1000);   // 1 = arm at full speed
   const target = brush * clamp(1.2 - vr * 0.25, 0.9, 1.25);
   curW += (target - curW) * 0.3;
   const mid = { x: (last.x + x) / 2, y: (last.y + y) / 2 };
@@ -633,7 +638,7 @@ function renderNoise() {
   nctx.putImageData(noiseImg, 0, 0);
 }
 function updateFx(now) {
-  const p = elapsed / T, r = 1 - p, sw = lvl().sway;
+  const p = elapsed / T, r = 1 - p, sw = swayOf();
   const kDark = Math.pow(p, 1.15);                 // steadily going dark from the first second
   const k1 = clamp((p - 0.25) / 0.75, 0, 1);       // tunnel vision
   const k2 = clamp((p - 0.45) / 0.55, 0, 1);       // blur, own ink fading
@@ -1226,6 +1231,7 @@ function setRaw(e) { raw.x = e.clientX; raw.y = e.clientY; hasPointer = true; }
 game.addEventListener('pointerdown', e => {
   e.preventDefault();
   setRaw(e);
+  if (state === 'ready' || state === 'play') touchMode = e.pointerType !== 'mouse';
   if (state === 'ready') { initAudio(); startPlay(performance.now()); }
   if (state !== 'play') return;
   try { game.setPointerCapture(e.pointerId); } catch (err) {}
@@ -1268,7 +1274,7 @@ function loop(now) {
     updateView(now);
     if (down && state === 'play') {
       // the dying arm can only move so fast: it chases the finger at a capped speed
-      const step = base * lvl().speed * dt;
+      const step = base * speedOf() * dt;
       const dx = raw.x - hand.x, dy = raw.y - hand.y, d = Math.hypot(dx, dy);
       if (d > step) { hand.x += dx / d * step; hand.y += dy / d * step; lag = d - step; }
       else { hand.x = raw.x; hand.y = raw.y; lag = 0; }
