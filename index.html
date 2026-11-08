@@ -521,7 +521,7 @@ function lurch(mag) {
   view.lvx += Math.cos(a) * mag * 0.1; view.lvy += Math.sin(a) * mag * 0.1;
 }
 function updateView(now) {
-  const p = state === 'play' ? elapsed / T : 0, sw = swayOf();
+  const p = state === 'play' ? clamp(elapsed / T, 0, 1) : 0, sw = swayOf();
   const t = now / 1000, ph = view.ph;
   const A = base * (0.004 + 0.15 * Math.pow(p, 1.4)) * sw;
   view.A = A;
@@ -559,6 +559,7 @@ function dot(x, y, r, col) {
 // (x,y) = where the ink lands on the floor, (sx,sy) = where you meant it on screen
 function addPoint(x, y, sx, sy, now) {
   if (!cur) return;
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(sx) || !Number.isFinite(sy)) return; // never store a broken point
   x = clamp(x, -M, W + M); y = clamp(y, -M, H + M);
   view.maxD = Math.max(view.maxD, Math.hypot(x - sx, y - sy));
   if (!last) {
@@ -636,7 +637,7 @@ function renderNoise() {
   nctx.putImageData(noiseImg, 0, 0);
 }
 function updateFx(now) {
-  const p = elapsed / T, r = 1 - p, sw = swayOf();
+  const p = clamp(elapsed / T, 0, 1), r = 1 - p, sw = swayOf();
   const kDark = Math.pow(p, 1.15);                 // steadily going dark from the first second
   const k1 = clamp((p - 0.25) / 0.75, 0, 1);       // tunnel vision
   const k2 = clamp((p - 0.45) / 0.55, 0, 1);       // blur, own ink fading
@@ -982,22 +983,33 @@ function analyze() {
   if (total < base * 0.15) score = Math.min(score, 3);
   if (!count) score = 0;
   score = clamp(score, 0, 100);
+  if (/[?&]debug=nan/.test(location.search)) score = NaN; // test switch for the 解読不能 screen
+  // safety net: if the measurement ever breaks (score is not a number), the case is "解読不能"
+  const unreadable = !Number.isFinite(score);
+  if (unreadable) score = 0;
+  const fin = v => Number.isFinite(v) ? v : 0;
 
-  const [, verdict, vSub, solved, comments] = verdictOf(score);
-  const comment = count ? pick(comments) : '何も書かずに息絶えました。犯人は安堵しています。';
+  const [, verdict0, vSub0, solved0, comments] = verdictOf(score);
+  const verdict = unreadable ? '解読不能' : verdict0;
+  const vSub = unreadable ? '鑑識の機械が判定できませんでした' : vSub0;
+  const solved = unreadable ? false : solved0;
+  const comment = !count ? '何も書かずに息絶えました。犯人は安堵しています。'
+    : unreadable ? pick(['鑑識の機械が煙を吹いて止まりました。', '解析装置が「理解不能」と表示したまま固まりました。', 'AI鑑識が初めて沈黙しました。'])
+    : pick(comments);
   // AI decoding: a character is read when it survived well enough
   const decoded = name.map((ch, i) => read[i] >= 0.6 || (read[i] >= 0.4 && rnd() < (read[i] - 0.4) * 5) ? ch : '？').join('');
   const conf = clamp(Math.round(score * rnd(0.85, 1.05)), 1, 99);
   const guess = !count ? '（何も書かれていない）'
+    : unreadable ? '解読不能（判定できませんでした）'
     : !decoded.replace(/？/g, '') ? `${pick(GUESS_LO)}と推定（信頼度 ${conf}%）`
     : decoded === odai ? `「${odai}」と判読（信頼度 ${conf}%）`
     : `「${decoded}」まで判読（信頼度 ${conf}%）`;
   return {
-    score, comment, guess, count, total, verdict, vSub, solved,
-    shape: Math.round(100 * (chars.length ? chars.reduce((a, c) => a + c.shape, 0) / chars.length : 0)),
-    layout: Math.round(layoutS * 100),
+    score, unreadable, comment, guess, count, total, verdict, vSub, solved,
+    shape: Math.round(100 * fin(chars.length ? chars.reduce((a, c) => a + c.shape, 0) / chars.length : 0)),
+    layout: Math.round(fin(layoutS) * 100),
     dir: detectLayout(chars.map(c => c.sc), medSize),
-    chars: name.map((ch, i) => ({ ch, r: Math.round(read[i] * 100) })),
+    chars: name.map((ch, i) => ({ ch, r: Math.round(fin(read[i]) * 100) })),
     expected: odaiStrokes,
     cm: (total / 37.8).toFixed(1), driftCm: (view.maxD / 37.8).toFixed(1),
     no: String(Math.floor(rnd(1000, 9999))), odai,
@@ -1101,9 +1113,13 @@ function makeCard(ev, res) {
   const sy = 960;
   g.fillStyle = '#556'; g.font = `700 28px ${SA}`; g.textAlign = 'left'; g.fillText('解読率', 60, sy);
   g.fillStyle = '#c3121d'; g.font = `900 150px ${SA}`; g.textBaseline = 'alphabetic';
-  const num = String(res.score); g.fillText(num, 52, sy + 160);
-  const nw = g.measureText(num).width;
-  g.font = `900 60px ${SA}`; g.fillText('%', 58 + nw, sy + 160);
+  if (res.unreadable) {
+    g.font = `900 76px ${SA}`; g.fillText('解読不能', 56, sy + 136);
+  } else {
+    const num = String(res.score); g.fillText(num, 52, sy + 160);
+    const nw = g.measureText(num).width;
+    g.font = `900 60px ${SA}`; g.fillText('%', 58 + nw, sy + 160);
+  }
   g.fillStyle = '#e2dccf'; g.fillRect(60, sy + 182, 440, 16);
   g.fillStyle = '#c3121d'; g.fillRect(60, sy + 182, 440 * res.score / 100, 16);
   // stamp
@@ -1221,7 +1237,9 @@ function revealResult() {
   document.querySelectorAll('.note').forEach(n => n.textContent = '');
   show('result'); scr.result.scrollTop = 0;
   const evEl = $('#evidence'); evEl.classList.remove('reveal'); void evEl.offsetWidth; evEl.classList.add('reveal');
+  $('.score small').style.display = r.unreadable ? 'none' : '';
   countUp($('#scoreNum'), $('#meterFill'), $('#stamp'), $('#comment'), r.score, 900);
+  if (r.unreadable) setTimeout(() => { $('#scoreNum').textContent = '解読不能'; }, 2400);
 }
 
 /* ---------- share ---------- */
@@ -1231,7 +1249,7 @@ function toast(t) {
 }
 const withUrl = t => /^https?:/.test(location.protocol) ? t + '\n' + location.href.split(/[?#]/)[0] : t;
 function stageShareText(r) {
-  return withUrl(`${r.stageName}（${r.stageType}・${r.sec}秒）で、瀕死の私が遺したダイイングメッセージ。\n捜査結果【${r.verdict}】解読率 ${r.score}%\n警察（みんな）、犯人の名前を解読してください🩸\n#ダイイングカリグラフィー`);
+  return withUrl(`${r.stageName}（${r.stageType}・${r.sec}秒）で、瀕死の私が遺したダイイングメッセージ。\n捜査結果【${r.verdict}】解読率 ${r.unreadable ? '解読不能' : r.score + '%'}\n警察（みんな）、犯人の名前を解読してください🩸\n#ダイイングカリグラフィー`);
 }
 function setShare(canvas, text, name) {
   const ctx = { canvas, blob: null, text, name };
@@ -1333,6 +1351,7 @@ document.addEventListener('touchmove', e => { if (state === 'play' || state === 
 const BEST_KEY = 'dying-calligraphy:best:v2';
 function loadBest() { try { return JSON.parse(localStorage.getItem(BEST_KEY)) || {}; } catch (e) { return {}; } }
 function saveBest(r) {
+  if (r.unreadable) return;
   try {
     const all = loadBest(), cur = all[r.stageIdx];
     if (!cur || r.score > cur.score) { all[r.stageIdx] = { score: r.score, verdict: r.verdict }; localStorage.setItem(BEST_KEY, JSON.stringify(all)); }
@@ -1371,7 +1390,9 @@ function loop(now) {
   frame++;
   const dt = clamp((now - lastFrame) / 1000, 0, 0.05); lastFrame = now;
   if (state === 'play') {
-    elapsed = (now - t0) / 1000;
+    // the frame timestamp can be a few ms older than the touch that started the clock:
+    // never let elapsed go negative (a negative power below turns everything into NaN)
+    elapsed = Math.max(0, (now - t0) / 1000);
     if (elapsed >= T) { elapsed = T; updateFx(now); die(); }
   }
   if (state === 'play' || state === 'ready') {
