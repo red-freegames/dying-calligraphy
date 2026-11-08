@@ -851,18 +851,28 @@ function makeEvidence() {
   } else { x0 = W * 0.25; y0 = H * 0.25; x1 = W * 0.75; y1 = H * 0.75; }
   let cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
   let w = Math.max(x1 - x0, base * 0.45), h = Math.max(y1 - y0, base * 0.3);
+  // only ever GROW the short side to reach the photo's aspect: the writing itself is never cropped
   if (w / h < AR) w = h * AR; else h = w / AR;
-  const FW = W + 2 * M, FH = H + 2 * M; // the whole floor, including what drifted off-screen
-  if (w > FW) { w = FW; h = Math.min(FH, w / AR); }
-  if (h > FH) { h = FH; w = Math.min(FW, h * AR); }
-  cx = clamp(cx, -M + w / 2, W + M - w / 2); cy = clamp(cy, -M + h / 2, H + M - h / 2);
-  const sx = cx - w / 2 + M, sy = cy - h / 2 + M; // canvas pixel space starts at -M
+  const FX0 = -M, FY0 = -M, FX1 = W + M, FY1 = H + M; // the whole floor, including what drifted off-screen
+  // slide the frame back onto the floor where it fits (it still contains the writing)
+  if (w <= FX1 - FX0) cx = clamp(cx, FX0 + w / 2, FX1 - w / 2);
+  if (h <= FY1 - FY0) cy = clamp(cy, FY0 + h / 2, FY1 - h / 2);
+  const ex0 = cx - w / 2, ey0 = cy - h / 2;
   const scale = Math.min(DPR, 1400 / w);
   const c = document.createElement('canvas');
   c.width = Math.round(w * scale); c.height = Math.round(h * scale);
   const g = c.getContext('2d');
-  g.drawImage(bg, sx * DPR, sy * DPR, w * DPR, h * DPR, 0, 0, c.width, c.height);
-  g.drawImage(ink, sx * DPR, sy * DPR, w * DPR, h * DPR, 0, 0, c.width, c.height);
+  // anything beyond the floor canvas (tall phone screens) becomes plain floor tone
+  g.fillStyle = '#cbbd9f'; g.fillRect(0, 0, c.width, c.height);
+  const ix0 = Math.max(ex0, FX0), iy0 = Math.max(ey0, FY0);
+  const ix1 = Math.min(ex0 + w, FX1), iy1 = Math.min(ey0 + h, FY1);
+  if (ix1 > ix0 && iy1 > iy0) {
+    const k = c.width / w;
+    const src = [(ix0 + M) * DPR, (iy0 + M) * DPR, (ix1 - ix0) * DPR, (iy1 - iy0) * DPR];
+    const dst = [(ix0 - ex0) * k, (iy0 - ey0) * k, (ix1 - ix0) * k, (iy1 - iy0) * k];
+    g.drawImage(bg, ...src, ...dst);
+    g.drawImage(ink, ...src, ...dst);
+  }
   // forensic photo lighting
   const lg = g.createRadialGradient(c.width * .45, c.height * .4, 0, c.width / 2, c.height / 2, Math.hypot(c.width, c.height) * .6);
   lg.addColorStop(0, 'rgba(255,255,255,.12)'); lg.addColorStop(1, 'rgba(0,0,0,.18)');
