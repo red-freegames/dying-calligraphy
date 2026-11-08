@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>ダイイング・カリグラフィー</title>
-<meta name="description" content="刺された。視界が暗く揺れて闇に沈む前に、犯人の名前を床に血文字で遺せ。死後、警察があなたのダイイングメッセージを解読する。全3事件の瀕死アクション。">
+<meta name="description" content="刺された。視界が暗く揺れて闇に沈む前に、犯人の名前を床に血文字で遺せ。死後、警察があなたのダイイングメッセージを解読する。全4事件の瀕死アクション。">
 <meta name="theme-color" content="#0b0505">
 <meta property="og:title" content="ダイイング・カリグラフィー">
 <meta property="og:description" content="刺された。闇に沈む前に、犯人の名前を血文字で遺せ。見えないまま書いた文字の全貌を、警察（みんな）は解読できるか。">
@@ -47,16 +47,18 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
 .t-rule{list-style:none;display:grid;gap:8px;font-size:14px;color:#cdbebe;text-align:left;
   background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px 18px;width:100%}
 .t-rule li::before{content:"🩸";margin-right:8px}
-.t-stages{list-style:none;display:grid;gap:8px;width:100%}
-.t-stages li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px 16px;border-radius:10px;
-  background:linear-gradient(90deg,rgba(195,18,29,.18),rgba(195,18,29,.04));border:1px solid rgba(195,18,29,.3);text-align:left}
-.t-stages b{font-family:var(--brush);font-weight:400;font-size:18px;color:#fff}
-.t-stages span{font-size:14px;color:#dcc}
-.t-stages em{font-style:normal;font-weight:900;color:#ff5a62;font-size:18px}
-#btnStart{margin-top:6px;font-size:22px;font-weight:900;letter-spacing:.2em;color:#fff;padding:18px 56px;border-radius:999px;
-  background:linear-gradient(180deg,#d01622,#7d0610);box-shadow:0 8px 30px rgba(208,22,34,.45),inset 0 1px 0 rgba(255,255,255,.25);
-  transition:transform .12s}
-#btnStart:active{transform:scale(.96)}
+.t-pick{font-family:var(--brush);font-size:20px;color:#fff;margin-top:4px}
+.t-stages{display:grid;gap:10px;width:100%}
+.t-stage{display:grid;grid-template-columns:1fr auto;align-items:center;gap:4px 12px;padding:14px 18px;border-radius:14px;text-align:left;color:#fff;
+  background:linear-gradient(90deg,rgba(208,22,34,.55),rgba(125,6,16,.35));border:1px solid rgba(255,90,98,.5);
+  box-shadow:0 6px 22px rgba(208,22,34,.25);transition:transform .12s}
+.t-stage:active{transform:scale(.97)}
+.t-stage b{font-family:var(--brush);font-weight:400;font-size:21px}
+.t-stage em{font-style:normal;font-weight:900;color:#ffd7d9;font-size:20px;grid-row:1/3;grid-column:2;text-align:right}
+.t-stage em small{display:block;font-size:11px;font-weight:700;color:#f4b6b9;letter-spacing:.1em}
+.t-stage span{font-size:13px;color:#f4dada}
+.t-stage .best{grid-column:1/-1;font-size:12px;color:#ffd23a;font-weight:700}
+.t-stage .best.none{color:#c9a9a9;font-weight:500}
 .t-note{font-size:12px;color:#866}
 /* ===== RED FREE GAMES 共通：他のゲーム・要望フォーム・フッター ===== */
 .t-more{display:block;width:100%;max-width:340px;padding:14px;border-radius:999px;text-align:center;text-decoration:none;font-weight:900;font-size:17px;
@@ -157,7 +159,11 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
 .btnX{background:#000;color:#fff;font-size:17px}
 .btnX .x{font-size:20px;margin-right:6px}
 .btnSave{background:#fff;color:var(--ink);border:2px solid var(--ink) !important}
-#btnRestart{background:linear-gradient(180deg,#d01622,#7d0610);color:#fff}
+.stats .chars{font-family:var(--brush);font-weight:400;font-size:18px;display:flex;flex-wrap:wrap;gap:6px}
+.stats .chars span{display:inline-flex;align-items:baseline;gap:4px;padding:2px 8px;border-radius:6px;background:#f4f1ea;border:1px solid #ddd5c5}
+.stats .chars span small{font-family:var(--sans);font-size:11px;font-weight:700;color:#667}
+.stats .chars span.ok{border-color:#c3121d;color:#c3121d}
+.stats .chars span.bad{color:#8a93a6}
 #fCardImg{display:block;width:100%;max-width:520px;margin:0 auto 16px;border-radius:10px;box-shadow:0 8px 26px rgba(20,25,40,.2)}
 #btnNext{background:linear-gradient(180deg,#d01622,#7d0610);color:#fff;font-size:18px;padding:18px}
 .btn-sub{background:transparent;color:#556;border:1px solid #c9bfae !important}
@@ -212,13 +218,9 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
       <li>見えないまま、見当違いの場所に書いてしまう</li>
       <li>死後、警察があなたの血文字から犯人を追う</li>
     </ul>
-    <ol class="t-stages">
-      <li><b>第一の事件</b><span>カタカナ3文字</span><em>5秒</em></li>
-      <li><b>第二の事件</b><span>ひらがな4文字</span><em>6秒</em></li>
-      <li><b>最後の事件</b><span>漢字4文字</span><em>12秒</em></li>
-    </ol>
-    <button id="btnStart">刺される</button>
-    <p class="t-note">※ 音が出ます（心音・鑑識フラッシュ）</p>
+    <p class="t-pick">どの事件で刺される？</p>
+    <div class="t-stages" id="stageList"></div>
+    <p class="t-note">※ 音が出ます（心音・鑑識フラッシュ）／横書き・縦書き・2文字ずつ、どの書き方でもOK</p>
     <a class="t-more" href="https://red-freegames.github.io/">🎮 他のゲームを見る</a>
     <a class="fb-link" id="fbTitle" target="_blank" rel="noopener">💬 要望・バグ報告はこちら</a>
     <footer class="site-foot">
@@ -278,21 +280,25 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
     </div>
     <p class="comment" id="comment"></p>
     <dl class="stats">
-      <div><dt>字形の保持</dt><dd id="stSteady">-</dd></div>
-      <div><dt>配置の正確さ</dt><dd id="stLen">-</dd></div>
-      <div><dt>画数（総延長）</dt><dd id="stCount">-</dd></div>
-      <div><dt>狙いとのズレ（最大）</dt><dd id="stShake">-</dd></div>
+      <div><dt>文字の形の崩れにくさ</dt><dd id="stShape">-</dd></div>
+      <div><dt>文字どうしの配置</dt><dd id="stLayout">-</dd></div>
+      <div><dt>画数（お手本）</dt><dd id="stCount">-</dd></div>
+      <div><dt>書き方（自動判定）</dt><dd id="stDir">-</dd></div>
+      <div class="wide"><dt>文字ごとの判読度</dt><dd id="stChars" class="chars">-</dd></div>
       <div class="wide"><dt>AI鑑識による解読</dt><dd id="stGuess">-</dd></div>
       <div class="wide"><dt>本人が書いたつもりの名前（お題）</dt><dd id="stOdai">-</dd></div>
     </dl>
-    <div class="next-top btns"><button id="btnNext">次の事件へ ▶</button></div>
+    <div class="next-top btns">
+      <button id="btnNext">次の事件へ ▶</button>
+      <button id="btnRetry" class="btn-sub">この事件をやり直す（別の犯人）</button>
+      <button id="btnSelect" class="btn-sub">事件を選びなおす</button>
+    </div>
     <div class="share">
       <h3>SNSシェアカード</h3>
       <img id="cardImg" alt="シェア用カード画像">
       <div class="btns">
         <button class="btnX"><span class="x">𝕏</span>で警察（みんな）に解読してもらう</button>
         <button class="btnSave">カード画像を保存</button>
-        <button id="btnRetry" class="btn-sub">この事件をやり直す</button>
         <a class="btn-more" href="https://red-freegames.github.io/">🎮 他のゲームを見る</a>
       </div>
       <p class="note"></p>
@@ -301,37 +307,6 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
   </div>
 </section>
 
-<!-- ====== FINAL ====== -->
-<section id="final" class="screen">
-  <div class="r-wrap">
-    <header class="r-head">
-      <div><span class="badge">鑑識課 第七係 ／ 最終報告</span><h2>連続ダイイングメッセージ事件</h2></div>
-      <p class="case" id="fCase"></p>
-    </header>
-    <div class="verdict" id="fVerdict"><small>最終捜査結果</small><b id="fvText"></b><span id="fvSub"></span></div>
-    <div class="f-list" id="fList"></div>
-    <div class="score-box">
-      <div class="label">総合解読率</div>
-      <div class="score"><span id="fScore">0</span><small>%</small></div>
-      <div class="meter"><i id="fMeter"></i></div>
-      <div class="stamp" id="fStamp">最終鑑定</div>
-    </div>
-    <p class="comment" id="fComment"></p>
-    <div class="share">
-      <h3>SNSシェアカード（3事件まとめ）</h3>
-      <img id="fCardImg" alt="3事件まとめのシェア用カード画像">
-      <div class="btns">
-        <button class="btnX"><span class="x">𝕏</span>で警察（みんな）に全部解読してもらう</button>
-        <button class="btnSave">カード画像を保存</button>
-        <button id="btnRestart">第一の事件から、もう一度刺される</button>
-        <a class="btn-more" href="https://red-freegames.github.io/">🎮 他のゲームを見る</a>
-        <button id="btnTitle" class="btn-sub">タイトルへ</button>
-      </div>
-      <p class="note"></p>
-      <a class="fb-link r" id="fbFinal" target="_blank" rel="noopener">💬 要望・バグ報告はこちら</a>
-    </div>
-  </div>
-</section>
 <div id="toast"></div>
 
 <script>
@@ -343,18 +318,21 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const rnd = (a = 1, b) => b === undefined ? Math.random() * a : a + Math.random() * (b - a);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 
-/* stages: sec = time to live, sway = how hard the dying vision drifts & darkens,
-   speed = max arm speed (screen-short-side per second), len = ink length for full "筆の量",
-   strokes = rough stroke count the name needs */
+/* stages (each one is played on its own):
+   sec = time to live, sway = how hard the dying vision drifts & darkens,
+   speed = max arm speed (screen-short-side per second), len = ink length (in screen short sides) a full name needs,
+   odai = [name, standard stroke count] — the judge compares your stroke count with the real one */
 const STAGES = [
-  { name: '第一の事件', sec: 5, type: 'カタカナ3文字', sway: 0.6, speed: 0.95, len: 1.3, strokes: 6,
-    odai: ['タナカ', 'サトウ', 'スズキ', 'ヨシダ', 'ヤマダ', 'イトウ', 'カトウ', 'キムラ', 'モリタ', 'ハヤシ'] },
-  { name: '第二の事件', sec: 6, type: 'ひらがな4文字', sway: 0.9, speed: 0.88, len: 2.3, strokes: 8,
-    odai: ['たかはし', 'やまもと', 'なかむら', 'こばやし', 'いのうえ', 'まつもと', 'さかもと', 'にしかわ', 'よしむら', 'おかもと'] },
-  { name: '最後の事件', sec: 12, type: '漢字4文字', sway: 1.2, speed: 0.75, len: 3.4, strokes: 20,
-    odai: ['鈴木次郎', '片岡愛里', '山田花子', '田中一郎', '佐藤正人', '中川大地', '小林春子', '森本光一', '大山力也', '石田正子'] },
+  { name: '第一の事件', sec: 5, type: 'カタカナ3文字', sway: 0.6, speed: 0.95, len: 1.3,
+    odai: [['タナカ', 7], ['サトウ', 8], ['スズキ', 9], ['ヨシダ', 11], ['ヤマダ', 9], ['イトウ', 7], ['カトウ', 7], ['キムラ', 7], ['モリタ', 8], ['ハヤシ', 7]] },
+  { name: '第二の事件', sec: 6, type: 'ひらがな4文字', sway: 0.9, speed: 0.88, len: 2.3,
+    odai: [['たかはし', 11], ['やまもと', 11], ['なかむら', 12], ['こばやし', 11], ['いのうえ', 7], ['まつもと', 9], ['さかもと', 11], ['にしかわ', 9], ['よしむら', 8], ['おかもと', 11]] },
+  { name: '第三の事件', sec: 9, type: '漢字3文字（画数少なめ）', sway: 1.0, speed: 0.85, len: 1.9,
+    odai: [['山口一', 7], ['小川力', 8], ['大山千', 9], ['上田久', 11], ['川上丈', 9], ['中川大', 10], ['山下仁', 10], ['大石円', 12]] },
+  { name: '第四の事件', sec: 12, type: '漢字4文字（画数多め）', sway: 1.25, speed: 0.85, len: 4.2,
+    odai: [['高田真理', 36], ['宮城美保', 37], ['前島春菜', 39], ['星野美紀', 38], ['坂根直哉', 34], ['柳原健吾', 37], ['浜野秀紀', 37], ['青木真紀', 31]] },
 ];
-let stageIdx = 0, T = STAGES[0].sec, stageResults = [];
+let stageIdx = 0, T = STAGES[0].sec, odaiStrokes = 0;
 const lvl = () => STAGES[stageIdx];
 // a finger writes far more naturally than a mouse, so touch play gets a heavier handicap
 const TOUCH = { sway: 1.4, speed: 0.8 };
@@ -363,7 +341,7 @@ const swayOf = () => lvl().sway * (touchMode ? TOUCH.sway : 1);
 const speedOf = () => lvl().speed * (touchMode ? TOUCH.speed : 1);
 
 /* ---------- elements ---------- */
-const scr = { title: $('#title'), game: $('#game'), result: $('#result'), final: $('#final') };
+const scr = { title: $('#title'), game: $('#game'), result: $('#result') };
 const game = $('#game'), stage = $('#stage');
 const bg = $('#bg'), ink = $('#ink'), pen = $('#pen'), noise = $('#noise');
 const bctx = bg.getContext('2d'), ictx = ink.getContext('2d'), pctx = pen.getContext('2d'), nctx = noise.getContext('2d');
@@ -728,7 +706,7 @@ function resetGame() {
 }
 function enterGame() {
   initAudio();
-  odai = pick(lvl().odai);
+  [odai, odaiStrokes] = pick(lvl().odai);
   resetGame();
   show('game');
   state = 'ready';
@@ -786,54 +764,220 @@ const VERDICTS = [
 ];
 const verdictOf = s => { let v = VERDICTS[0]; for (const x of VERDICTS) if (s >= x[0]) v = x; return v; };
 const GUESS_LO = ['「カレーうどん」', '「明日は燃えるゴミ」', '古代文字の一種', '「たぶん、左」', '地図（宝のありか？）', '「ア」または猫の後ろ姿', '福笑い（失敗）'];
-// partially decoded name: each character survives with a chance tied to the score
-function partialName(name, score) {
-  return [...name].map(ch => rnd() < score / 100 + 0.1 ? ch : '？').join('');
+/* =====================================================================
+   判定（AI鑑識）
+   1. 書いた順番で画を「文字」に分ける。書き順＝読み順なので、横書き・縦書き・
+      2文字ずつ（横／縦）など、どんな並べ方でも同じ方法で分けられる。
+   2. 文字ごとに「狙った形（画面上）」と「床に残った形」を比べる。
+      回転・拡大縮小・位置ずれは文字が丸ごと動くだけで読めるので許し、
+      文字の中で画どうしがずれた分（＝崩れ）だけを数える。
+   3. 床の上で文字どうしが重なっていないか、順番が入れ替わっていないか、
+      間隔が崩れていないかを見る。
+   4. お題の名前の本来の画数と比べて、書き足りない／なぐり書きを見分ける。
+===================================================================== */
+const box0 = () => ({ x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity });
+const boxAdd = (b, x, y) => { if (x < b.x0) b.x0 = x; if (y < b.y0) b.y0 = y; if (x > b.x1) b.x1 = x; if (y > b.y1) b.y1 = y; return b; };
+const boxUnion = (a, b) => ({ x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0), x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1) });
+const boxCenter = b => ({ x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2 });
+const boxSize = b => Math.max(b.x1 - b.x0, b.y1 - b.y0);
+// overlap of two boxes relative to the smaller one; boxes are shrunk first so tightly-spaced
+// (but separate) characters don't count as colliding
+function boxOverlap(a, b, shrink) {
+  const sh = (q) => { const c = boxCenter(q), w = (q.x1 - q.x0) * (1 - shrink) / 2 + brush * 0.5, h = (q.y1 - q.y0) * (1 - shrink) / 2 + brush * 0.5;
+    return { x0: c.x - w, y0: c.y - h, x1: c.x + w, y1: c.y + h }; };
+  const A = sh(a), B = sh(b);
+  const iw = Math.min(A.x1, B.x1) - Math.max(A.x0, B.x0), ih = Math.min(A.y1, B.y1) - Math.max(A.y0, B.y0);
+  if (iw <= 0 || ih <= 0) return 0;
+  const area = q => (q.x1 - q.x0) * (q.y1 - q.y0);
+  return clamp(iw * ih / Math.max(1, Math.min(area(A), area(B))), 0, 1);
+}
+// best similarity fit (shift + rotate + uniform scale) of P onto Q; returns what is left over
+function procrustes(P, Q) {
+  const n = P.length;
+  if (n < 2) return { res: 0, size: 0 };
+  let px = 0, py = 0, qx = 0, qy = 0;
+  for (let i = 0; i < n; i++) { px += P[i].x; py += P[i].y; qx += Q[i].x; qy += Q[i].y; }
+  px /= n; py /= n; qx /= n; qy /= n;
+  let a = 0, b = 0, pp = 0, qq = 0;
+  for (let i = 0; i < n; i++) {
+    const ux = P[i].x - px, uy = P[i].y - py, vx = Q[i].x - qx, vy = Q[i].y - qy;
+    a += ux * vx + uy * vy; b += ux * vy - uy * vx; pp += ux * ux + uy * uy; qq += vx * vx + vy * vy;
+  }
+  if (pp < 1e-6) return { res: 0, size: Math.sqrt(qq / n) };
+  const s = Math.hypot(a, b) / pp, th = Math.atan2(b, a), c = Math.cos(th) * s, sn = Math.sin(th) * s;
+  let r = 0;
+  for (let i = 0; i < n; i++) {
+    const ux = P[i].x - px, uy = P[i].y - py;
+    r += (Q[i].x - qx - (c * ux - sn * uy)) ** 2 + (Q[i].y - qy - (sn * ux + c * uy)) ** 2;
+  }
+  return { res: Math.sqrt(r / n), size: Math.sqrt(qq / n) };
+}
+// split strokes (kept in writing order) into n consecutive runs whose screen footprints are smallest.
+// A run is measured as the square on its longest side, so one thin stroke is as "big" as a whole
+// character: splitting a character into strokes never pays, merging two characters always costs extra
+function splitIntoChars(items, n) {
+  const m = items.length;
+  if (m <= n) return items.map(it => [it]);
+  const pad = brush * 2, INF = 1e18;
+  const cost = [];
+  for (let a = 0; a < m; a++) {
+    cost[a] = new Float64Array(m);
+    let b0 = null;
+    for (let b = a; b < m; b++) {
+      b0 = b0 ? boxUnion(b0, items[b].s) : { ...items[a].s };
+      cost[a][b] = (Math.max(b0.x1 - b0.x0, b0.y1 - b0.y0) + pad) ** 2;
+    }
+  }
+  const dp = [], cut = [];
+  for (let k = 0; k <= n; k++) { dp.push(new Float64Array(m + 1).fill(INF)); cut.push(new Int32Array(m + 1)); }
+  dp[0][0] = 0;
+  for (let k = 1; k <= n; k++)
+    for (let j = k; j <= m; j++)
+      for (let i = k - 1; i < j; i++) {
+        const v = dp[k - 1][i] + cost[i][j - 1];
+        if (v < dp[k][j]) { dp[k][j] = v; cut[k][j] = i; }
+      }
+  const groups = [];
+  for (let k = n, j = m; k >= 1; k--) { const i = cut[k][j]; groups.unshift(items.slice(i, j)); j = i; }
+  return groups;
+}
+// how the characters were laid out (on screen, as the player meant them)
+function detectLayout(cs, size) {
+  const n = cs.length;
+  if (n < 2) return '判定不能';
+  const near = (a, b, k) => Math.abs(a - b) < size * k;
+  const xs = cs.map(c => c.x), ys = cs.map(c => c.y);
+  const rx = Math.max(...xs) - Math.min(...xs), ry = Math.max(...ys) - Math.min(...ys);
+  if (Math.max(rx, ry) < size * 0.8) return '重ね書き';
+  if (n === 4) {
+    if (near(cs[0].y, cs[1].y, 0.5) && near(cs[2].y, cs[3].y, 0.5) && !near(cs[0].y, cs[2].y, 0.6)) return '2文字ずつ横書き';
+    if (near(cs[0].x, cs[1].x, 0.5) && near(cs[2].x, cs[3].x, 0.5) && !near(cs[0].x, cs[2].x, 0.6)) return '2文字ずつ縦書き';
+  }
+  if (rx > ry * 1.6) return '横書き';
+  if (ry > rx * 1.6) return '縦書き';
+  return '斜め・バラバラ';
 }
 
-function meanOf(pts) {
-  const m = { fx: 0, fy: 0, sx: 0, sy: 0 };
-  for (const q of pts) { m.fx += q.x; m.fy += q.y; m.sx += q.sx; m.sy += q.sy; }
-  const n = pts.length || 1;
-  m.fx /= n; m.fy /= n; m.sx /= n; m.sy /= n;
-  return m;
-}
-// average gap between "where you meant it" (screen) and "where it landed" (floor), after aligning centres
-function misplace(pts) {
-  const m = meanOf(pts); let d = 0;
-  for (const q of pts) d += Math.hypot((q.x - m.fx) - (q.sx - m.sx), (q.y - m.fy) - (q.sy - m.sy));
-  return d / (pts.length || 1);
-}
 function analyze() {
-  let total = 0, count = 0, shapeDev = 0, shapeN = 0;
-  const all = [];
-  for (const s of strokes) {
-    if (!s.length) continue;
-    count++;
-    for (let i = 1; i < s.length; i++) total += Math.hypot(s[i].x - s[i - 1].x, s[i].y - s[i - 1].y);
-    if (s.length >= 3) { shapeDev += misplace(s) * s.length; shapeN += s.length; }
-    for (const q of s) all.push(q);
+  const name = [...odai], n = name.length;
+  // 1) stroke summaries; tiny taps/dots are set aside so they can't pose as a character
+  const items = [], minors = [];
+  let total = 0;
+  strokes.forEach((s, i) => {
+    if (!s.length) return;
+    const f = box0(), sc = box0();
+    let len = 0;
+    for (let k = 0; k < s.length; k++) {
+      boxAdd(f, s[k].x, s[k].y); boxAdd(sc, s[k].sx, s[k].sy);
+      if (k) len += Math.hypot(s[k].x - s[k - 1].x, s[k].y - s[k - 1].y);
+    }
+    total += len;
+    const it = { i, pts: s, len, f, s: sc };
+    (len < brush * 0.8 ? minors : items).push(it);
+  });
+  const count = items.length + minors.length;
+
+  // 2) characters, in writing order
+  const groups = items.length ? splitIntoChars(items, n) : [];
+  const gBox = g => g.reduce((b, it) => boxUnion(b, it.s), box0());
+  // dots join the nearest character (dakuten etc.); dots far from everything are just stray blood
+  let stray = 0;
+  for (const d of minors) {
+    let best = -1, bd = Infinity;
+    groups.forEach((g, gi) => {
+      const b = gBox(g), c = boxCenter(d.s);
+      const dx = Math.max(b.x0 - c.x, 0, c.x - b.x1), dy = Math.max(b.y0 - c.y, 0, c.y - b.y1), dist = Math.hypot(dx, dy);
+      if (dist < bd) { bd = dist; best = gi; }
+    });
+    if (best >= 0 && bd < Math.max(boxSize(gBox(groups[best])) * 0.6, brush * 4)) groups[best].push(d); else stray++;
   }
-  const shapeS = shapeN ? clamp(1 - shapeDev / shapeN / base / 0.03, 0, 1) : 0;   // strokes bent by the swaying view
-  const placeS = all.length ? clamp(1 - misplace(all) / base / 0.09, 0, 1) : 0;  // strokes landed in the wrong place
+  const chars = groups.map(g => {
+    const pts = [];
+    for (const it of g) for (const q of it.pts) pts.push(q);
+    const step = Math.max(1, Math.floor(pts.length / 400));
+    const P = [], Q = [], sb = box0(), fb = box0();
+    for (let k = 0; k < pts.length; k++) {
+      boxAdd(sb, pts[k].sx, pts[k].sy); boxAdd(fb, pts[k].x, pts[k].y);
+      if (k % step === 0) { P.push({ x: pts[k].sx, y: pts[k].sy }); Q.push({ x: pts[k].x, y: pts[k].y }); }
+    }
+    // shape kept inside the character: leftover after the best rotate/scale/shift fit
+    const pr = procrustes(P, Q);
+    const size = boxSize(sb);
+    // leftover displacement relative to half the character's size: up to ~8% is invisible,
+    // a stroke knocked ~1/3 of the way across the character still reads at about half
+    const rel = pr.res / Math.max(size / 2, brush * 2);
+    let shape = pts.length < 3 ? 1 : clamp(1 - (rel - 0.08) / 0.5, 0, 1);
+    // scribble check: real strokes are about as long as the character is big (even curly kana stay
+    // under ~2x); zig-zag scribbling makes strokes several times longer than the character
+    const avgLen = g.reduce((a, it) => a + it.len, 0) / g.length;
+    const scribble = clamp(1 - (avgLen / Math.max(size, brush * 3) - 2.0) / 0.8, 0, 1);
+    shape *= scribble;
+    return { sb, fb, sc: boxCenter(sb), fc: boxCenter(fb), size, shape, scribble };
+  });
+  const sizes = chars.map(c => c.size).sort((a, b) => a - b);
+  const medSize = sizes.length ? sizes[sizes.length >> 1] : 0;
+
+  // 3) characters against each other, on the floor
+  const coll = chars.map(() => 0);
+  for (let a = 0; a < chars.length; a++)
+    for (let b = a + 1; b < chars.length; b++) {
+      const o = boxOverlap(chars[a].fb, chars[b].fb, 0.15);
+      coll[a] = Math.max(coll[a], o); coll[b] = Math.max(coll[b], o);
+    }
+  let orderBad = 0;
+  for (let a = 0; a + 1 < chars.length; a++) {
+    const vs = { x: chars[a + 1].sc.x - chars[a].sc.x, y: chars[a + 1].sc.y - chars[a].sc.y };
+    const vf = { x: chars[a + 1].fc.x - chars[a].fc.x, y: chars[a + 1].fc.y - chars[a].fc.y };
+    const cos = (vs.x * vf.x + vs.y * vf.y) / Math.max(1e-6, Math.hypot(vs.x, vs.y) * Math.hypot(vf.x, vf.y));
+    if (cos < 0.5) orderBad++;   // the next character ended up on the wrong side: reading order breaks
+  }
+  const orderS = chars.length > 1 ? 1 - orderBad / (chars.length - 1) : 1;
+  let spaceS = 1;
+  if (chars.length >= 3) {
+    const pr = procrustes(chars.map(c => c.sc), chars.map(c => c.fc));
+    spaceS = clamp(1 - (pr.res / Math.max(pr.size, medSize * 0.5, 1)) / 0.35, 0, 1);
+  }
+  const meanColl = coll.length ? coll.reduce((a, b) => a + b, 0) / coll.length : 0;
+  const layoutS = chars.length ? clamp(0.5 * (1 - 1.2 * meanColl) + 0.25 * orderS + 0.25 * spaceS, 0, 1) : 0;
+
+  // 4) completeness: right number of strokes for this name, enough ink, every character present
+  const ratio = count / odaiStrokes;
+  const strokeS = ratio < 1 ? clamp((ratio - 0.25) / 0.55, 0, 1) : clamp(1 - (ratio - 1.7) / 1.3, 0, 1);
   const lenS = clamp(total / (base * lvl().len), 0, 1);
-  // too few strokes for the name (e.g. one straight line) can't be calligraphy
-  const strokeS = clamp(count / lvl().strokes, 0, 1);
-  let score = Math.round(100 * (shapeS * 0.35 + placeS * 0.45 + lenS * 0.2) * (0.35 + 0.65 * strokeS));
+  const present = chars.map(c => c.size >= medSize * 0.35);
+  const charsS = present.filter(Boolean).length / n;
+  const complete = 0.45 * strokeS + 0.25 * lenS + 0.3 * charsS;
+
+  // readability of each character of the name (missing ones read as 0)
+  const read = name.map((ch, i) => {
+    const c = chars[i];
+    if (!c) return 0;
+    return clamp(c.shape * (1 - 0.8 * coll[i]) * (present[i] ? 1 : 0.4) * (0.6 + 0.4 * strokeS), 0, 1);
+  });
+  const meanRead = read.reduce((a, b) => a + b, 0) / n;
+  if (/[?&]debug/.test(location.search)) window.__judge = { groups: groups.map(g => g.map(it => it.i)), chars: chars.map(c => ({ shape: +c.shape.toFixed(2), scribble: +c.scribble.toFixed(2), size: Math.round(c.size), sc: [Math.round(c.sc.x), Math.round(c.sc.y)] })), medSize, coll, present, read, strokeS, lenS, charsS, layoutS, orderS, spaceS, stray };
+  const quality = 0.6 * meanRead + 0.4 * layoutS;
+  let score = Math.round(100 * quality * (0.25 + 0.75 * complete) - Math.min(10, stray * 2));
   if (total < base * 0.15) score = Math.min(score, 3);
   if (!count) score = 0;
   score = clamp(score, 0, 100);
 
   const [, verdict, vSub, solved, comments] = verdictOf(score);
   const comment = count ? pick(comments) : '何も書かずに息絶えました。犯人は安堵しています。';
-  const conf = clamp(Math.round(score * rnd(0.8, 1.1)), 1, 99);
+  // AI decoding: a character is read when it survived well enough
+  const decoded = name.map((ch, i) => read[i] >= 0.6 || (read[i] >= 0.4 && rnd() < (read[i] - 0.4) * 5) ? ch : '？').join('');
+  const conf = clamp(Math.round(score * rnd(0.85, 1.05)), 1, 99);
   const guess = !count ? '（何も書かれていない）'
-    : score >= 85 ? `「${odai}」と判読（信頼度 ${conf}%）`
-    : score >= 25 ? `「${partialName(odai, score)}」まで判読（信頼度 ${conf}%）`
-    : `${pick(GUESS_LO)}と推定（信頼度 ${conf}%）`;
+    : !decoded.replace(/？/g, '') ? `${pick(GUESS_LO)}と推定（信頼度 ${conf}%）`
+    : decoded === odai ? `「${odai}」と判読（信頼度 ${conf}%）`
+    : `「${decoded}」まで判読（信頼度 ${conf}%）`;
   return {
     score, comment, guess, count, total, verdict, vSub, solved,
-    shape: Math.round(shapeS * 100), place: Math.round(placeS * 100),
+    shape: Math.round(100 * (chars.length ? chars.reduce((a, c) => a + c.shape, 0) / chars.length : 0)),
+    layout: Math.round(layoutS * 100),
+    dir: detectLayout(chars.map(c => c.sc), medSize),
+    chars: name.map((ch, i) => ({ ch, r: Math.round(read[i] * 100) })),
+    expected: odaiStrokes,
     cm: (total / 37.8).toFixed(1), driftCm: (view.maxD / 37.8).toFixed(1),
     no: String(Math.floor(rnd(1000, 9999))), odai,
     stageIdx, stageName: lvl().name, stageType: lvl().type, sec: lvl().sec,
@@ -965,7 +1109,7 @@ function makeCard(ev, res) {
 
 
 const FONT_TEXT = 'ダイイングメッセージ鑑定書証拠品鑑識課第七係機械判定現場床面に遺された血文字全貌達筆度鑑定済鑑識コメントAI解読警察みんな解読してください' +
-  '#第一二最後の事件秒連続総合最終報告称号0123456789%（）／─No.解読率捜査結果逮捕未解決全員件迷宮入り' +
+  '#第一二三四の事件秒0123456789%（）／─No.解読率捜査結果逮捕未解決' +
   VERDICTS.map(v => v[1]).join('');
 async function loadFonts(texts) {
   try {
@@ -986,8 +1130,8 @@ async function buildResult() {
   evCanvas = makeEvidence();
   await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub);
   cardCanvas = makeCard(evCanvas, r);
-  stageResults[stageIdx] = { res: r, ev: evCanvas, evUrl: evCanvas.toDataURL('image/jpeg', 0.9) };
-  $('#evImg').src = stageResults[stageIdx].evUrl;
+  $('#evImg').src = evCanvas.toDataURL('image/jpeg', 0.9);
+  saveBest(r);
   $('#cardImg').src = cardCanvas.toDataURL('image/png');
   setShare(cardCanvas, stageShareText(r), `dying-message-${r.no}.png`);
   result = r;
@@ -1032,10 +1176,18 @@ function revealResult() {
   $('#rBadge').textContent = `鑑識課 第七係 ／ ${r.stageName}`;
   $('#caseInfo').innerHTML = `事件番号 ${d.getFullYear()}-${r.no}<br>${d.getMonth() + 1}月${d.getDate()}日 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')} 撮影`;
   $('#evCap').textContent = `証拠品 No.${r.no}：現場床面に遺された血文字（全貌）`;
-  $('#stSteady').textContent = r.count ? r.shape + '%' : '-';
-  $('#stLen').textContent = r.count ? r.place + '%' : '-';
-  $('#stCount').textContent = `${r.count}画（約${r.cm}cm）`;
-  $('#stShake').textContent = `約${r.driftCm}cm`;
+  $('#stShape').textContent = r.count ? r.shape + '%' : '-';
+  $('#stLayout').textContent = r.count ? r.layout + '%' : '-';
+  $('#stCount').textContent = `${r.count}画（${r.expected}画）`;
+  $('#stDir').textContent = r.count ? r.dir : '-';
+  const cs = $('#stChars'); cs.innerHTML = '';
+  for (const c of r.chars) {
+    const s = document.createElement('span');
+    s.className = c.r >= 60 ? 'ok' : c.r < 40 ? 'bad' : '';
+    s.textContent = c.ch;
+    const sm = document.createElement('small'); sm.textContent = c.r + '%';
+    s.appendChild(sm); cs.appendChild(s);
+  }
   $('#stGuess').textContent = r.guess;
   $('#stOdai').textContent = `「${r.odai}」（${r.stageType}）`;
   $('#comment').textContent = r.comment;
@@ -1043,114 +1195,12 @@ function revealResult() {
   showVerdict($('#verdict'), $('#vText'), $('#vSub'), r.verdict, r.vSub, r.solved);
   track('stage_end', { stage: stageIdx + 1, score: r.score, verdict: r.verdict, solved: r.solved });
   const nx = STAGES[stageIdx + 1];
-  $('#btnNext').textContent = nx ? `${nx.name}へ ▶（${nx.type}・${nx.sec}秒）` : '最終鑑定へ ▶';
+  $('#btnNext').style.display = nx ? '' : 'none';
+  if (nx) $('#btnNext').textContent = `${nx.name}へ ▶（${nx.type}・${nx.sec}秒）`;
   document.querySelectorAll('.note').forEach(n => n.textContent = '');
   show('result'); scr.result.scrollTop = 0;
   const evEl = $('#evidence'); evEl.classList.remove('reveal'); void evEl.offsetWidth; evEl.classList.add('reveal');
   countUp($('#scoreNum'), $('#meterFill'), $('#stamp'), $('#comment'), r.score, 900);
-}
-
-/* ---------- final verdict ---------- */
-// overall outcome = how many of the 3 culprits were caught
-const FINALS = [
-  ['全事件 迷宮入り', '犯人は3人とも野放しです', '3人の犯人は、今夜も祝杯をあげています。'],
-  ['1件 逮捕', '残る2人の犯人は逃走中', '1人は捕まりました。残る2人はまだ高笑いしています。'],
-  ['2件 逮捕', 'あと1人、取り逃がしました', 'あと1人。あなたの血文字は無駄になりませんでした。'],
-  ['全員逮捕', '3事件とも完全解決', '3つの命と引き換えに、正義は果たされました。'],
-];
-
-function makeFinalCard(list, total, rank, rcom, no) {
-  const c = document.createElement('canvas'); c.width = 1200; c.height = 1200;
-  const g = c.getContext('2d');
-  const BR = '"Yuji Syuku","Hiragino Mincho ProN","Yu Mincho",serif', SA = '"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif';
-  g.fillStyle = '#f4f1ea'; g.fillRect(0, 0, 1200, 1200);
-  g.strokeStyle = 'rgba(30,40,60,.06)'; g.lineWidth = 1;
-  for (let i = 0; i <= 1200; i += 40) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 1200); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(1200, i); g.stroke(); }
-  g.fillStyle = '#1b2130'; g.fillRect(0, 0, 1200, 124);
-  g.fillStyle = '#c3121d'; g.fillRect(0, 124, 1200, 6);
-  g.textBaseline = 'middle'; g.textAlign = 'left';
-  g.fillStyle = '#fff'; g.font = `46px ${BR}`; g.fillText('連続ダイイングメッセージ事件', 50, 64);
-  g.textAlign = 'right'; g.font = `700 22px ${SA}`;
-  g.fillStyle = '#ffd23a'; g.fillText('最終鑑定書　No.' + no, 1150, 46);
-  g.fillStyle = '#9aa3b8'; g.font = `500 22px ${SA}`; g.fillText('鑑識課 第七係 ／ 機械判定', 1150, 86);
-  list.forEach((x, i) => {
-    const r = x.res, y = 152 + i * 284, pw = 432, ph = 268, px = 60;
-    g.save(); g.shadowColor = 'rgba(20,25,40,.3)'; g.shadowBlur = 18; g.shadowOffsetY = 6;
-    g.fillStyle = '#fff'; g.fillRect(px - 8, y - 8, pw + 16, ph + 16); g.restore();
-    g.fillStyle = '#2a2622'; g.fillRect(px, y, pw, ph);
-    const s = Math.min(pw / x.ev.width, ph / x.ev.height), dw = x.ev.width * s, dh = x.ev.height * s;
-    g.drawImage(x.ev, px + (pw - dw) / 2, y + (ph - dh) / 2, dw, dh);
-    drawMarker(g, px + 10, y + ph - 46, 38, String(i + 1));
-    const tx = 530;
-    g.textAlign = 'left'; g.textBaseline = 'alphabetic';
-    g.fillStyle = '#1b2130'; g.font = `36px ${BR}`; g.fillText(r.stageName, tx, y + 44);
-    g.fillStyle = '#667'; g.font = `500 20px ${SA}`; g.fillText(`${r.stageType}・${r.sec}秒`, tx + 200, y + 42);
-    g.fillStyle = '#c3121d'; g.font = `900 96px ${SA}`;
-    const num = String(r.score); g.fillText(num, tx - 4, y + 148);
-    const nw = g.measureText(num).width; g.font = `900 40px ${SA}`; g.fillText('%', tx + nw, y + 148);
-    g.fillStyle = '#e2dccf'; g.fillRect(tx, y + 164, 600, 10);
-    g.fillStyle = '#c3121d'; g.fillRect(tx, y + 164, 600 * r.score / 100, 10);
-    g.fillStyle = r.solved ? '#c3121d' : '#4a5468'; g.font = `34px ${BR}`;
-    g.fillText(r.verdict, tx, y + 216);
-    g.fillStyle = '#1b2130'; g.font = `22px ${BR}`;
-    g.fillText(wrapText(g, r.comment, 600)[0], tx, y + 254);
-  });
-  // total
-  const by = 1010;
-  g.fillStyle = '#1b2130'; g.fillRect(60, by - 8, 1080, 3);
-  g.textAlign = 'left'; g.textBaseline = 'alphabetic';
-  g.fillStyle = '#556'; g.font = `700 24px ${SA}`; g.fillText('総合解読率', 60, by + 32);
-  g.fillStyle = '#c3121d'; g.font = `900 104px ${SA}`;
-  const tn = String(total); g.fillText(tn, 52, by + 138);
-  const tw = g.measureText(tn).width; g.font = `900 46px ${SA}`; g.fillText('%', 58 + tw, by + 138);
-  g.fillStyle = '#556'; g.font = `700 22px ${SA}`; g.fillText('最終捜査結果', 400, by + 32);
-  g.fillStyle = rank.includes('逮捕') ? '#c3121d' : '#4a5468'; g.font = `54px ${BR}`; g.fillText(rank, 400, by + 92);
-  g.fillStyle = '#445'; g.font = `21px ${BR}`;
-  wrapText(g, rcom, 720).slice(0, 2).forEach((l, k) => g.fillText(l, 400, by + 124 + k * 24));
-  g.save(); g.translate(1090, by + 64); g.rotate(-0.25); g.globalAlpha = .85;
-  g.strokeStyle = '#d0101c'; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 54, 0, 7); g.stroke();
-  g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 46, 0, 7); g.stroke();
-  g.fillStyle = '#d0101c'; g.font = `24px ${BR}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText('最終', 0, -13); g.fillText('鑑定', 0, 15);
-  g.restore();
-  g.fillStyle = '#1b2130'; g.fillRect(0, 1160, 1200, 40);
-  g.fillStyle = '#fff'; g.font = `700 20px ${SA}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText('#ダイイングカリグラフィー　─　警察（みんな）、全部解読できますか？', 600, 1181);
-  return c;
-}
-
-async function showFinal() {
-  const list = stageResults.filter(Boolean);
-  const total = Math.round(list.reduce((a, x) => a + x.res.score, 0) / STAGES.length);
-  const arrests = list.filter(x => x.res.solved).length;
-  const [rank, rsub, rcom] = FINALS[clamp(arrests, 0, 3)];
-  const no = String(Math.floor(rnd(1000, 9999)));
-  await loadFonts(FONT_TEXT + rank + rsub + rcom + list.map(x => x.res.comment).join(''));
-  const card = makeFinalCard(list, total, rank, rcom, no);
-  const fl = $('#fList'); fl.innerHTML = '';
-  for (const x of list) {
-    const r = x.res, el = document.createElement('div');
-    el.className = 'f-item';
-    el.innerHTML = '<img><div><div class="lab"></div><div class="vd"></div><div class="sc"><span></span><small>%</small></div><div class="od">犯人 <b></b></div><div class="cm"></div></div>';
-    el.querySelector('.vd').textContent = r.verdict;
-    el.querySelector('.vd').classList.toggle('cold', !r.solved);
-    el.querySelector('img').src = x.evUrl; el.querySelector('img').alt = r.stageName + 'の血文字';
-    el.querySelector('.lab').innerHTML = `${r.stageName}<small>${r.stageType}・${r.sec}秒</small>`;
-    el.querySelector('.sc span').textContent = r.score;
-    el.querySelector('.od b').textContent = `「${r.odai}」`;
-    el.querySelector('.cm').textContent = r.comment;
-    fl.appendChild(el);
-  }
-  $('#fCase').innerHTML = `事件番号 ${new Date().getFullYear()}-${no}<br>連続${list.length}件`;
-  $('#fComment').textContent = rcom;
-  showVerdict($('#fVerdict'), $('#fvText'), $('#fvSub'), rank, `${rsub}（逮捕 ${arrests}／${list.length}件）`, arrests > 0);
-  track('game_clear', { total, arrests });
-  $('#fCardImg').src = card.toDataURL('image/png');
-  setShare(card, finalShareText(total, rank), `dying-message-final-${no}.png`);
-  document.querySelectorAll('.note').forEach(n => n.textContent = '');
-  state = 'final';
-  show('final'); scr.final.scrollTop = 0;
-  countUp($('#fScore'), $('#fMeter'), $('#fStamp'), $('#fComment'), total, 400);
 }
 
 /* ---------- share ---------- */
@@ -1161,9 +1211,6 @@ function toast(t) {
 const withUrl = t => /^https?:/.test(location.protocol) ? t + '\n' + location.href.split(/[?#]/)[0] : t;
 function stageShareText(r) {
   return withUrl(`${r.stageName}（${r.stageType}・${r.sec}秒）で、瀕死の私が遺したダイイングメッセージ。\n捜査結果【${r.verdict}】解読率 ${r.score}%\n警察（みんな）、犯人の名前を解読してください🩸\n#ダイイングカリグラフィー`);
-}
-function finalShareText(total, rank) {
-  return withUrl(`3つの事件で、瀕死の私が遺したダイイングメッセージ。\n最終捜査結果【${rank}】総合解読率 ${total}%\n警察（みんな）、3人の犯人の名前を解読できますか？🩸\n#ダイイングカリグラフィー`);
 }
 function setShare(canvas, text, name) {
   const ctx = { canvas, blob: null, text, name };
@@ -1219,7 +1266,7 @@ const SITE_URL = 'https://red-freegames.github.io/';
 // 要望・バグ報告フォーム（共通のGoogleフォーム）。「対象のゲーム」に同じ名前の選択肢を追加すると選択済みで開く
 const GAME_NAME = 'ダイイング・カリグラフィー';
 const FEEDBACK_VIEW = 'https://docs.google.com/forms/d/e/1FAIpQLSfJ2DevI46AJiB_kUAmPGOvckFRqzzSP_iCVd5qiikxr9SIOg/viewform';
-['fbTitle', 'fbResult', 'fbFinal'].forEach(id => {
+['fbTitle', 'fbResult'].forEach(id => {
   $('#' + id).href = `${FEEDBACK_VIEW}?usp=pp_url&entry.2056875219=${encodeURIComponent(GAME_NAME)}`;
 });
 // アクセス解析（Googleアナリティクス4）。本番（github.io）でだけ計測し、画面には何も出さない
@@ -1260,13 +1307,39 @@ game.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { ha
 game.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('touchmove', e => { if (state === 'play' || state === 'ready') e.preventDefault(); }, { passive: false });
 
-$('#btnStart').addEventListener('click', () => { stageIdx = 0; stageResults = []; enterGame(); });
+/* ---------- case select (every case is played on its own) ---------- */
+// best record per case, kept only in this browser (a convenience; the game works without it)
+const BEST_KEY = 'dying-calligraphy:best:v2';
+function loadBest() { try { return JSON.parse(localStorage.getItem(BEST_KEY)) || {}; } catch (e) { return {}; } }
+function saveBest(r) {
+  try {
+    const all = loadBest(), cur = all[r.stageIdx];
+    if (!cur || r.score > cur.score) { all[r.stageIdx] = { score: r.score, verdict: r.verdict }; localStorage.setItem(BEST_KEY, JSON.stringify(all)); }
+  } catch (e) {}
+}
+function renderStageList() {
+  const best = loadBest();
+  $('#stageList').innerHTML = '';
+  STAGES.forEach((st, i) => {
+    const b = document.createElement('button');
+    b.className = 't-stage';
+    b.innerHTML = '<b></b><em></em><span></span><span class="best"></span>';
+    b.querySelector('b').textContent = st.name;
+    b.querySelector('em').innerHTML = `${st.sec}秒<small>刺される ▶</small>`;
+    b.querySelector('span').textContent = `犯人の名前：${st.type}`;
+    const bs = b.querySelector('.best');
+    if (best[i]) bs.textContent = `最高記録：${best[i].verdict}（解読率 ${best[i].score}%）`;
+    else { bs.textContent = 'まだ挑戦していません'; bs.classList.add('none'); }
+    b.addEventListener('click', () => { stageIdx = i; enterGame(); });
+    $('#stageList').appendChild(b);
+  });
+}
+function toTitle() { state = 'title'; renderStageList(); show('title'); scr.title.scrollTop = 0; }
+renderStageList();
+
 $('#btnRetry').addEventListener('click', () => enterGame());
-$('#btnNext').addEventListener('click', () => {
-  if (stageIdx < STAGES.length - 1) { stageIdx++; enterGame(); } else showFinal();
-});
-$('#btnRestart').addEventListener('click', () => { stageIdx = 0; stageResults = []; enterGame(); });
-$('#btnTitle').addEventListener('click', () => { state = 'title'; show('title'); });
+$('#btnNext').addEventListener('click', () => { if (stageIdx < STAGES.length - 1) { stageIdx++; enterGame(); } });
+$('#btnSelect').addEventListener('click', toTitle);
 document.querySelectorAll('.btnX').forEach(b => b.addEventListener('click', shareX));
 document.querySelectorAll('.btnSave').forEach(b => b.addEventListener('click', () => { if (shareCtx) { downloadCard(); toast('カード画像を保存しました'); } }));
 window.addEventListener('resize', () => { if (state === 'ready') resetGame(); });
