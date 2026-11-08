@@ -328,10 +328,30 @@ const STAGES = [
   { name: '第二の事件', sec: 6, type: 'ひらがな4文字', sway: 0.9, speed: 0.88, len: 2.3,
     odai: [['たかはし', 11], ['やまもと', 11], ['なかむら', 12], ['こばやし', 11], ['いのうえ', 7], ['まつもと', 9], ['さかもと', 11], ['にしかわ', 9], ['よしむら', 8], ['おかもと', 11]] },
   { name: '第三の事件', sec: 9, type: '漢字3文字（画数少なめ）', sway: 1.0, speed: 0.85, len: 1.9,
-    odai: [['山口一', 7], ['小川力', 8], ['大山千', 9], ['上田久', 11], ['川上丈', 9], ['中川大', 10], ['山下仁', 10], ['大石円', 12]] },
+    // kanji names list only the name: the stroke count is added up from KANJI_STROKES below
+    odai: ('山口一 小川力 大山千 上田久 川上丈 中川大 山下仁 大石円 ' +
+      '山田一 田中力 中山仁 小山太 大川文 川口正 上山元 山本一 木下文 井上正 ' +
+      '石川力 石田久 今井仁 内田元 中田久 本田一 古川公 平山力 北川丈 白石一 ' +
+      '永井大 市川仁 土井文 大木正 三木介 小田三 丸山千 千田弘 太田元 水口了 ' +
+      '戸田一 日下心 中本友 石井力 大内斗 平田一 北山公 今田丈 古田力 本山大 ' +
+      '五木元 小川士 大山巧 山口文 川上介 上田了 中川久 山下正 大石公 三上斗').split(' ') },
   { name: '第四の事件', sec: 12, type: '漢字4文字（画数多め）', sway: 1.25, speed: 0.85, len: 4.2,
-    odai: [['高田真理', 36], ['宮城美保', 37], ['前島春菜', 39], ['星野美紀', 38], ['坂根直哉', 34], ['柳原健吾', 37], ['浜野秀紀', 37], ['青木真紀', 31]] },
+    odai: ('高田真理 宮城美保 前島春菜 星野美紀 坂根直哉 柳原健吾 浜野秀紀 青木真紀 ' +
+      '松岡香奈 森村彩花 浅野恵理 菊池涼太 梅原夏美 桜井雪菜 秋山晴彦 青柳結衣 宮崎陽向 黒田悠真 ' +
+      '荒井航平 酒井将真 浜田海斗 南野洋介 柴田浩紀 倉持康介 桑原泰造 庭野恭子 桐島修一 清水隆史 ' +
+      '菅原勇気 堀内俊介 細川拓海 奥村和真 富岡昌宏 渡部明美 湯浅知佳 長野英治 金井茂雄 河野若菜 ' +
+      '相馬宗一 神田幸恵 西野昭彦 柏木政信 秋元政宏 星野純平 島田紗希 高野莉奈 姫野栞菜 宮原望美 ' +
+      '野崎渚沙 梨本康平 椎名智恵 森田遥香 原口裕貴 浅井雄大 岡部敦史 野村達也 菊地博美 前田晴美').split(' ') },
 ];
+// standard stroke counts of every kanji used in the names (the judge compares your strokes with these)
+const KANJI_STROKES = {};
+[[1, '一'], [2, '二力了'], [3, '山口小川大千上久丈下土三丸士子也'], [4, '中木井今内太水戸日五仁円文介元斗心友公夫'],
+  [5, '田石本古平北白永市正生由央弘功司史礼巧'], [6, '衣向気名地池西'], [7, '坂吾秀村花宏希沙'],
+  [8, '直青松岡奈拓和昌明知佳長英治金茂河若宗幸'], [9, '城美保前春星紀哉柳香浅秋彦南洋海持俊勇相神昭柏政信荒'],
+  [10, '高真宮島根原浜恵梅夏桜航酒将柴浩倉桑泰造庭恭桐修馬純紗莉姫栞'], [11, '理菜野健彩菊涼雪崎悠黒康清隆菅堀細部望渚梨'],
+  [12, '森晴結陽奥富渡湯雄椎智遥裕貴敦達博'],
+].forEach(([n, s]) => { for (const ch of s) KANJI_STROKES[ch] = n; });
+const strokesOf = name => [...name].reduce((a, ch) => a + (KANJI_STROKES[ch] || 8), 0);
 let stageIdx = 0, T = STAGES[0].sec, odaiStrokes = 0;
 const lvl = () => STAGES[stageIdx];
 // a finger writes far more naturally than a mouse, so touch play gets a heavier handicap
@@ -706,7 +726,8 @@ function resetGame() {
 }
 function enterGame() {
   initAudio();
-  [odai, odaiStrokes] = pick(lvl().odai);
+  const o = pick(lvl().odai);
+  [odai, odaiStrokes] = typeof o === 'string' ? [o, strokesOf(o)] : o;
   resetGame();
   show('game');
   state = 'ready';
