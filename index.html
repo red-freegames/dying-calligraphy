@@ -467,18 +467,53 @@ function sfxShutter() {
 const vib = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 
 /* ---------- setup ---------- */
+// Browsers refuse canvases that are too big (iOS/iPadOS Safari: ~16.7M pixels each, plus a cap on
+// total canvas memory) and then silently draw NOTHING: the floor goes black and the ink vanishes,
+// while the judge still scores the recorded strokes. So each floor canvas gets a pixel budget,
+// is tested after sizing, and the resolution drops until drawing really works.
+const CANVAS_BUDGET = 5e6;   // pixels per floor canvas (3 of them ≈ 60 MB)
+let canvasBroken = false;
+// test pixel is copied into a tiny separate canvas and read there: reading pixels straight back
+// from the big floor canvases can make Chrome move them off the GPU (slower drawing)
+const probeCtx = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+probeCtx.canvas.width = probeCtx.canvas.height = 1;
+function canvasWorks(c, ctx) {
+  try {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = '#010203'; ctx.fillRect(0, 0, 1, 1);
+    probeCtx.clearRect(0, 0, 1, 1);
+    probeCtx.drawImage(c, 0, 0, 1, 1, 0, 0, 1, 1);
+    const d = probeCtx.getImageData(0, 0, 1, 1).data;
+    ctx.clearRect(0, 0, 1, 1);
+    return d[0] === 1 && d[1] === 2 && d[2] === 3 && d[3] === 255;
+  } catch (e) { return false; }
+}
 function setup() {
-  DPR = Math.min(2, window.devicePixelRatio || 1);
   W = window.innerWidth; H = window.innerHeight; base = Math.min(W, H);
   M = Math.round(base * 0.35);
   brush = clamp(base * 0.021, 5, 16);
+  const FW = W + 2 * M, FH = H + 2 * M;
+  // the budget only trims high-density screens (tablets, Retina); it never goes below 1x on its own,
+  // so big PC monitors stay as sharp as before. Below 1x happens only if the browser really fails.
+  const dpr0 = Math.min(2, window.devicePixelRatio || 1, Math.max(1, Math.sqrt(CANVAS_BUDGET / (FW * FH))));
+  const size = () => {
+    for (const c of [bg, ink, pen]) {
+      c.width = Math.max(1, Math.round(FW * DPR)); c.height = Math.max(1, Math.round(FH * DPR));
+      c.style.width = FW + 'px'; c.style.height = FH + 'px';
+      c.style.left = -M + 'px'; c.style.top = -M + 'px';
+    }
+  };
   // floor canvases extend M beyond the screen on every side; floor coords = screen coords at rest
-  for (const [c, ctx] of [[bg, bctx], [ink, ictx], [pen, pctx]]) {
-    c.width = Math.round((W + 2 * M) * DPR); c.height = Math.round((H + 2 * M) * DPR);
-    c.style.width = (W + 2 * M) + 'px'; c.style.height = (H + 2 * M) + 'px';
-    c.style.left = -M + 'px'; c.style.top = -M + 'px';
-    ctx.setTransform(DPR, 0, 0, DPR, M * DPR, M * DPR);
+  DPR = dpr0;
+  for (let tries = 0; ; tries++) {
+    size();
+    canvasBroken = ![[bg, bctx], [ink, ictx], [pen, pctx]].every(([c, ctx]) => canvasWorks(c, ctx));
+    if (!canvasBroken || tries >= 6) break;
+    DPR *= 0.6;   // too big for this browser: try again smaller
   }
+  // still broken at every size: keep the normal size (the result photo is rebuilt from the strokes)
+  if (canvasBroken) { DPR = dpr0; size(); }
+  for (const ctx of [bctx, ictx, pctx]) ctx.setTransform(DPR, 0, 0, DPR, M * DPR, M * DPR);
   const nw = 140, nh = Math.max(1, Math.round(140 * H / W));
   noise.width = nw; noise.height = nh; noiseImg = nctx.createImageData(nw, nh);
   drawFloor();
@@ -1037,7 +1072,7 @@ function makeEvidence() {
   if (w <= FX1 - FX0) cx = clamp(cx, FX0 + w / 2, FX1 - w / 2);
   if (h <= FY1 - FY0) cy = clamp(cy, FY0 + h / 2, FY1 - h / 2);
   const ex0 = cx - w / 2, ey0 = cy - h / 2;
-  const scale = Math.min(DPR, 1400 / w);
+  const scale = Math.min(Math.max(DPR, 1), 1400 / w);
   const c = document.createElement('canvas');
   c.width = Math.round(w * scale); c.height = Math.round(h * scale);
   const g = c.getContext('2d');
@@ -1045,7 +1080,21 @@ function makeEvidence() {
   g.fillStyle = '#cbbd9f'; g.fillRect(0, 0, c.width, c.height);
   const ix0 = Math.max(ex0, FX0), iy0 = Math.max(ey0, FY0);
   const ix1 = Math.min(ex0 + w, FX1), iy1 = Math.min(ey0 + h, FY1);
-  if (ix1 > ix0 && iy1 > iy0) {
+  if (canvasBroken) {
+    // the floor canvases could not draw on this device: rebuild the writing from the recorded strokes
+    const k = c.width / w;
+    g.save(); g.scale(k, k); g.translate(-ex0, -ey0);
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    g.strokeStyle = g.fillStyle = 'rgba(125,4,14,.92)'; g.lineWidth = brush * 1.1;
+    for (const s of strokes) {
+      if (!s.length) continue;
+      if (s.length === 1) { g.beginPath(); g.arc(s[0].x, s[0].y, brush * 0.6, 0, Math.PI * 2); g.fill(); continue; }
+      g.beginPath(); g.moveTo(s[0].x, s[0].y);
+      for (let i = 1; i < s.length; i++) g.lineTo(s[i].x, s[i].y);
+      g.stroke();
+    }
+    g.restore();
+  } else if (ix1 > ix0 && iy1 > iy0) {
     const k = c.width / w;
     const src = [(ix0 + M) * DPR, (iy0 + M) * DPR, (ix1 - ix0) * DPR, (iy1 - iy0) * DPR];
     const dst = [(ix0 - ex0) * k, (iy0 - ey0) * k, (ix1 - ix0) * k, (iy1 - iy0) * k];
@@ -1166,6 +1215,8 @@ async function loadFonts(texts) {
 
 async function buildResult() {
   const r = analyze();
+  // free the previous round's photo and card right away (Safari counts every live canvas against its memory cap)
+  for (const old of [evCanvas, cardCanvas]) if (old) { old.width = 0; old.height = 0; }
   evCanvas = makeEvidence();
   await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub);
   cardCanvas = makeCard(evCanvas, r);
