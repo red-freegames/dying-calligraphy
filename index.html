@@ -975,15 +975,30 @@ function writtenFeature(strokeList) {   // strokeList: [[{x,y},...], ...] as the
   }
   return featureOf(P);
 }
+// two reference styles: a plain gothic and a brush hand (closer to how people actually write)
+const RECOG_STYLES = [
+  { font: s => `500 ${s}px ${RECOG_FONT}`, check: '500 40px "Zen Kaku Gothic New"' },
+  { font: s => `400 ${s}px "Yuji Syuku","Yu Mincho","Hiragino Mincho ProN",serif`, check: '400 40px "Yuji Syuku"' },
+];
 const tplCache = new Map();
 let tplCtx = null;
-function templateFeature(ch) {
-  if (tplCache.has(ch)) return tplCache.get(ch);
+function templateFeature(ch) {   // one feature per reference style
+  return RECOG_STYLES.map((st, i) => {
+    const key = ch + '|' + i;
+    if (tplCache.has(key)) return tplCache.get(key);
+    const f = templateFeatureOne(ch, st.font);
+    // keep it only once the real web font is in; a fallback-font rendering is redone next time
+    let ready = false; try { ready = document.fonts.check(st.check, ch); } catch (e) {}
+    if (ready) tplCache.set(key, f);
+    return f;
+  }).filter(Boolean);
+}
+function templateFeatureOne(ch, fontOf) {
   const S = 64;
   if (!tplCtx) { const c = document.createElement('canvas'); c.width = c.height = S; tplCtx = c.getContext('2d', { willReadFrequently: true }); }
   const g = tplCtx;
   g.clearRect(0, 0, S, S); g.fillStyle = '#000'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = `500 ${S * 0.82}px ${RECOG_FONT}`; g.fillText(ch, S / 2, S / 2);
+  g.font = fontOf(S * 0.82); g.fillText(ch, S / 2, S / 2);
   const d = g.getImageData(0, 0, S, S).data, A = new Float32Array(S * S);
   const b = box0();
   for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) { const v = d[(y * S + x) * 4 + 3] / 255; A[y * S + x] = v; if (v > 0.3) boxAdd(b, x, y); }
@@ -1000,10 +1015,10 @@ function templateFeature(ch) {
     }
     f = featureOf(P);
   }
-  tplCache.set(ch, f);
   return f;
 }
 const dot256 = (a, b) => { let s = 0; for (let i = 0; i < 256; i++) s += a[i] * b[i]; return s; };
+const simTo = (f, ch) => { let m = -1; for (const t of templateFeature(ch)) m = Math.max(m, dot256(f, t)); return m; };
 // how well does the written character match `target`, compared with every other candidate?
 function recognize(strokeList, target) {
   const f = writtenFeature(strokeList);
@@ -1011,14 +1026,13 @@ function recognize(strokeList, target) {
   let st = -1, best = '？', bs = -2, below = 0, n = 0;
   const sims = [];
   for (const ch of candidatesOf(target)) {
-    const t = templateFeature(ch);
-    if (!t) continue;
-    const s = dot256(f, t);
+    const s = simTo(f, ch);
+    if (s < -0.5) continue;
     sims.push(s);
     if (ch === target) st = s;
     if (s > bs) { bs = s; best = ch; }
   }
-  if (st < -0.5) { const t = templateFeature(target); st = t ? dot256(f, t) : 0; }
+  if (st < -0.5) st = Math.max(0, simTo(f, target));
   let above = 0;
   for (const s of sims) { n++; if (s < st) below++; else if (s > st) above++; }
   return { pct: n > 1 ? below / (n - 1) : 0, rank: above, best, sim: st, bestSim: bs };
@@ -1078,7 +1092,10 @@ function analyze() {
     });
     if (best >= 0 && bd < Math.max(boxSize(gBox(groups[best])) * 0.6, brush * 4)) groups[best].push(d); else stray++;
   }
-  const chars = groups.map(g => {
+  const chars = groups.map((g, gi) => {
+    // is it really the お題 character? (judged on the shape the player meant, so the swaying view doesn't count twice)
+    const rec = recognize(g.map(it => it.pts.map(q => ({ x: q.sx, y: q.sy }))), name[gi]);
+    const recog = recogFactor(rec);
     const pts = [];
     for (const it of g) for (const q of it.pts) pts.push(q);
     const step = Math.max(1, Math.floor(pts.length / 400));
@@ -1099,7 +1116,7 @@ function analyze() {
     const avgLen = g.reduce((a, it) => a + it.len, 0) / g.length;
     const scribble = clamp(1 - (avgLen / Math.max(size, brush * 3) - 2.0) / 0.8, 0, 1);
     shape *= scribble;
-    return { sb, fb, sc: boxCenter(sb), fc: boxCenter(fb), size, shape, scribble };
+    return { sb, fb, sc: boxCenter(sb), fc: boxCenter(fb), size, shape, scribble, rec, recog };
   });
   const sizes = chars.map(c => c.size).sort((a, b) => a - b);
   const medSize = sizes.length ? sizes[sizes.length >> 1] : 0;
@@ -1135,17 +1152,25 @@ function analyze() {
   const charsS = present.filter(Boolean).length / n;
   const complete = 0.45 * strokeS + 0.25 * lenS + 0.3 * charsS;
 
-  // readability of each character of the name (missing ones read as 0)
-  const read = name.map((ch, i) => {
+  // how legible each character is on the floor (missing ones read as 0)...
+  const legib = name.map((ch, i) => {
     const c = chars[i];
     if (!c) return 0;
     return clamp(c.shape * (1 - 0.8 * coll[i]) * (present[i] ? 1 : 0.4) * (0.6 + 0.4 * strokeS), 0, 1);
   });
+  // ...and it only counts as the お題 character when it actually looks like it
+  const read = name.map((ch, i) => chars[i] ? legib[i] * chars[i].recog : 0);
   const meanRead = read.reduce((a, b) => a + b, 0) / n;
-  if (/[?&]debug/.test(location.search)) window.__judge = { groups: groups.map(g => g.map(it => it.i)), chars: chars.map(c => ({ shape: +c.shape.toFixed(2), scribble: +c.scribble.toFixed(2), size: Math.round(c.size), sc: [Math.round(c.sc.x), Math.round(c.sc.y)] })), medSize, coll, present, read, strokeS, lenS, charsS, layoutS, orderS, spaceS, stray };
+  // 冤罪: the writing is legible, but it is somebody else's name
+  const writtenN = chars.length;
+  const legibMean = writtenN ? legib.slice(0, writtenN).reduce((a, b) => a + b, 0) / writtenN : 0;
+  const recogMean = writtenN ? chars.reduce((a, c) => a + c.recog, 0) / writtenN : 0;
+  const framed = count > 0 && legibMean >= 0.45 && recogMean < 0.35;
+  if (/[?&]debug/.test(location.search)) window.__judge = { groups: groups.map(g => g.map(it => it.i)), chars: chars.map(c => ({ shape: +c.shape.toFixed(2), scribble: +c.scribble.toFixed(2), size: Math.round(c.size), best: c.rec.best, recog: +c.recog.toFixed(2), sc: [Math.round(c.sc.x), Math.round(c.sc.y)] })), medSize, coll, present, legib, read, framed, strokeS, lenS, charsS, layoutS, orderS, spaceS, stray };
   const quality = 0.6 * meanRead + 0.4 * layoutS;
   let score = Math.round(100 * quality * (0.25 + 0.75 * complete) - Math.min(10, stray * 2));
   if (total < base * 0.15) score = Math.min(score, 3);
+  if (framed) score = Math.min(score, 9);   // somebody else's name: neatly laid out, but it decodes nothing
   if (!count) score = 0;
   score = clamp(score, 0, 100);
   if (/[?&]debug=nan/.test(location.search)) score = NaN; // test switch for the 解読不能 screen
@@ -1154,23 +1179,35 @@ function analyze() {
   if (unreadable) score = 0;
   const fin = v => Number.isFinite(v) ? v : 0;
 
+  // AI decoding: a legible character is read as the お題 character if it matches, otherwise as what it looks like
+  const decoded = name.map((ch, i) => {
+    const c = chars[i];
+    if (!c) return '？';
+    const seen = legib[i] >= 0.6 || (legib[i] >= 0.4 && rnd() < (legib[i] - 0.4) * 5);
+    return !seen ? '？' : c.recog >= 0.5 ? ch : c.rec.best;
+  }).join('');
+  const framedName = decoded.replace(/？/g, '') ? decoded : '身元不明の人物';
+
   const [, verdict0, vSub0, solved0, comments] = verdictOf(score);
-  const verdict = unreadable ? '解読不能' : verdict0;
-  const vSub = unreadable ? '鑑識の機械が判定できませんでした' : vSub0;
-  const solved = unreadable ? false : solved0;
+  const verdict = unreadable ? '解読不能' : framed ? '冤罪' : verdict0;
+  const vSub = unreadable ? '鑑識の機械が判定できませんでした'
+    : framed ? '無関係の人が逮捕され、真犯人は逃亡しました' : vSub0;
+  const solved = unreadable || framed ? false : solved0;
   const comment = !count ? '何も書かずに息絶えました。犯人は安堵しています。'
     : unreadable ? pick(['鑑識の機械が煙を吹いて止まりました。', '解析装置が「理解不能」と表示したまま固まりました。', 'AI鑑識が初めて沈黙しました。'])
+    : framed ? pick([`無実の「${framedName}」さんが逮捕されました。真犯人は高笑いしています。`,
+      `「${framedName}」さんの家族が涙の抗議会見を開きました。`,
+      `取調室で「${framedName}」さんが泣いています。真犯人は国外へ逃亡しました。`])
     : pick(comments);
-  // AI decoding: a character is read when it survived well enough
-  const decoded = name.map((ch, i) => read[i] >= 0.6 || (read[i] >= 0.4 && rnd() < (read[i] - 0.4) * 5) ? ch : '？').join('');
   const conf = clamp(Math.round(score * rnd(0.85, 1.05)), 1, 99);
   const guess = !count ? '（何も書かれていない）'
     : unreadable ? '解読不能（判定できませんでした）'
     : !decoded.replace(/？/g, '') ? `${pick(GUESS_LO)}と推定（信頼度 ${conf}%）`
     : decoded === odai ? `「${odai}」と判読（信頼度 ${conf}%）`
-    : `「${decoded}」まで判読（信頼度 ${conf}%）`;
+    : decoded.includes('？') ? `「${decoded}」まで判読（信頼度 ${conf}%）`
+    : `「${decoded}」と判読（信頼度 ${conf}%）`;
   return {
-    score, unreadable, comment, guess, count, total, verdict, vSub, solved,
+    score, unreadable, framed, comment, guess, count, total, verdict, vSub, solved,
     shape: Math.round(100 * fin(chars.length ? chars.reduce((a, c) => a + c.shape, 0) / chars.length : 0)),
     layout: Math.round(fin(layoutS) * 100),
     dir: detectLayout(chars.map(c => c.sc), medSize),
@@ -1321,7 +1358,7 @@ function makeCard(ev, res, mode = 'answer') {
   g.strokeStyle = '#d0101c'; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 62, 0, 7); g.stroke();
   g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 54, 0, 7); g.stroke();
   g.fillStyle = '#d0101c'; g.font = `30px ${BR}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(res.solved ? '逮捕' : '未解決', 0, 2);
+  g.fillText(res.solved ? '逮捕' : res.framed ? '冤罪' : '未解決', 0, 2);
   g.restore();
   // case verdict (no decoded name here: the card is for others to solve)
   const cx = 580, cw = 560, vcol = res.solved ? '#c3121d' : '#4a5468';
@@ -1342,7 +1379,7 @@ function makeCard(ev, res, mode = 'answer') {
 
 const FONT_TEXT = 'ダイイングメッセージ鑑定書証拠品鑑識課第七係機械判定現場床面に遺された血文字全貌達筆度鑑定済鑑識コメントAI解読警察みんな解読してください' +
   '#第一二三四の事件秒0123456789%（）／─No.解読率捜査結果逮捕未解決' +
-  VERDICTS.map(v => v[1]).join('');
+  VERDICTS.map(v => v[1]).join('') + '冤罪解読不能無関係逮捕真犯人逃亡';
 async function loadFonts(texts) {
   try {
     await Promise.race([
@@ -1358,6 +1395,8 @@ async function loadFonts(texts) {
 }
 
 async function buildResult() {
+  // the recogniser draws every candidate character with the web fonts: make sure they are loaded first
+  await loadFonts(candidatesOf([...odai][0]).join('') + odai);
   const r = analyze();
   // free the previous round's photo and card right away (Safari counts every live canvas against its memory cap)
   for (const old of [evCanvas, cardCanvas, quizCanvas]) if (old) { old.width = 0; old.height = 0; }
@@ -1447,7 +1486,7 @@ function revealResult() {
   $('#stGuess').textContent = r.guess;
   $('#stOdai').textContent = `「${r.odai}」（${r.stageType}）`;
   $('#comment').textContent = r.comment;
-  $('#stamp').textContent = r.solved ? '逮捕' : '未解決';
+  $('#stamp').textContent = r.solved ? '逮捕' : r.framed ? '冤罪' : '未解決';
   showVerdict($('#verdict'), $('#vText'), $('#vSub'), r.verdict, r.vSub, r.solved);
   track('stage_end', { stage: stageIdx + 1, score: r.score, verdict: r.verdict, solved: r.solved });
   const nx = STAGES[stageIdx + 1];
