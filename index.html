@@ -1020,9 +1020,9 @@ function templateFeatureOne(ch, fontOf) {
 const dot256 = (a, b) => { let s = 0; for (let i = 0; i < 256; i++) s += a[i] * b[i]; return s; };
 const simTo = (f, ch) => { let m = -1; for (const t of templateFeature(ch)) m = Math.max(m, dot256(f, t)); return m; };
 // how well does the written character match `target`, compared with every other candidate?
-function recognize(strokeList, target) {
-  const f = writtenFeature(strokeList);
-  if (!f) return { pct: 0, best: '？' };
+function recognize(strokeList, target) { return recognizeF(writtenFeature(strokeList), target); }
+function recognizeF(f, target) {
+  if (!f) return { pct: 0, rank: 999, best: '？', sim: 0, bestSim: 1 };
   let st = -1, best = '？', bs = -2, below = 0, n = 0;
   const sims = [];
   for (const ch of candidatesOf(target)) {
@@ -1037,10 +1037,79 @@ function recognize(strokeList, target) {
   for (const s of sims) { n++; if (s < st) below++; else if (s > st) above++; }
   return { pct: n > 1 ? below / (n - 1) : 0, rank: above, best, sim: st, bestSim: bs };
 }
-// recognised enough? full credit when the お題 character is within 0.04 of the best-matching candidate,
-// none from 0.10 on (tested on hand-drawn kana/kanji: right ≈ 86–97%, a different character ≈ 1–4%)
-const recogFactor = r => clamp(1 - ((r.bestSim - r.sim) - 0.04) / 0.06, 0, 1);
-if (/[?&]debug/.test(location.search)) window.__recognize = recognize;
+/* Is the writing the お題 name at all?  Judged on the WHOLE name and leniently — similar kana
+   (ト/レ, ウ/フ, シ/ツ…) fool a character-by-character reader, so the お題 wins whenever it is
+   plausibly what was written. Only a clearly different name is "not the お題" (→ 冤罪).
+   冤罪 is only for a COMPLETELY different name. The お題 is accepted if ANY of these holds:
+   - it matches better than every other suspect of this case
+   - on average its characters are close to the best-looking candidates
+   - at least half of its characters are very close
+   (tested: every correctly written name passes; ~83% of completely different names become 冤罪,
+    the rest happen to resemble the お題 more than any other suspect and are given the benefit of the doubt) */
+const NAME_RULE = { maxBetter: 0, maxGapMean: 0.12, charGap: 0.05 };
+// split the strokes (in writing order) into the characters of `name` so that it reads as `name` best.
+// Characters with widely separated strokes (い, 川, 小…) can fool a split by position alone.
+function splitAsName(strokesList, name) {
+  const m = strokesList.length, n = name.length;
+  if (m < n) return null;
+  const MAXW = 16;   // no name character here has more than 12 strokes (+ slack for extra dots)
+  const feat = new Map(), memo = new Map();
+  const sim = (a, b, k) => {   // strokes a..b as character k (features computed once per stroke run)
+    const key = a * 1000 + b * 10 + k;
+    if (!memo.has(key)) {
+      const fk = a * 1000 + b;
+      if (!feat.has(fk)) feat.set(fk, writtenFeature(strokesList.slice(a, b + 1)));
+      const f = feat.get(fk);
+      memo.set(key, f ? simTo(f, name[k]) : -1);
+    }
+    return memo.get(key);
+  };
+  const NEG = -1e9, dp = [], cut = [];
+  for (let k = 0; k <= n; k++) { dp.push(new Float64Array(m + 1).fill(NEG)); cut.push(new Int32Array(m + 1)); }
+  dp[0][0] = 0;
+  for (let k = 1; k <= n; k++)
+    for (let j = k; j <= m - (n - k); j++)
+      for (let i = Math.max(k - 1, j - MAXW); i < j; i++) {
+        if (dp[k - 1][i] <= NEG / 2) continue;
+        const v = dp[k - 1][i] + sim(i, j - 1, k - 1);
+        if (v > dp[k][j]) { dp[k][j] = v; cut[k][j] = i; }
+      }
+  const groups = [];
+  for (let k = n, j = m; k >= 1; k--) { const i = cut[k][j]; groups.unshift(strokesList.slice(i, j)); j = i; }
+  return groups;
+}
+function nameMatch(charStrokes, odaiName, suspects, allStrokes) {
+  const name = [...odaiName];
+  // two ways to cut the writing into characters: by position (the judge's own split) and "as the お題 would be
+  // written" — the お題 gets whichever reads better (being lenient on purpose)
+  const tries = [charStrokes];
+  const guided = allStrokes && allStrokes.length <= 60 ? splitAsName(allStrokes, name) : null;
+  if (guided) tries.push(guided);
+  let best = null;
+  for (const cs of tries) { const r = nameMatchOne(cs, name, odaiName, suspects); if (!best || r.sOdai > best.sOdai) best = r; }
+  return best;
+}
+function nameMatchOne(charStrokes, name, odaiName, suspects) {
+  const feats = charStrokes.slice(0, name.length).map(s => writtenFeature(s));
+  const idx = feats.map((f, i) => f ? i : -1).filter(i => i >= 0);   // characters actually written
+  if (!idx.length) return { isOdai: true, per: [], better: 0, gapMean: 0, closeChars: 0, written: 0, sOdai: 0 };
+  const per = name.map((ch, i) => feats[i] ? recognizeF(feats[i], ch) : null);
+  const sOdai = idx.reduce((a, i) => a + per[i].sim, 0) / idx.length;
+  let better = 0;
+  for (const nm of suspects) {
+    const cs = [...nm];
+    if (nm === odaiName || cs.length !== name.length) continue;
+    const s = idx.reduce((a, i) => a + simTo(feats[i], cs[i]), 0) / idx.length;
+    if (s > sOdai) better++;
+  }
+  const gaps = idx.map(i => per[i].bestSim - per[i].sim);
+  const gapMean = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+  const closeChars = gaps.filter(g => g <= NAME_RULE.charGap).length;
+  const isOdai = better <= NAME_RULE.maxBetter || gapMean <= NAME_RULE.maxGapMean || closeChars * 2 >= idx.length;
+  return { isOdai, per, better, gapMean, closeChars, written: idx.length, sOdai };
+}
+const suspectsOf = st => st.odai.map(o => typeof o === 'string' ? o : o[0]);
+if (/[?&]debug/.test(location.search)) { window.__recognize = recognize; window.__nameMatch = nameMatch; window.__suspects = i => suspectsOf(STAGES[i]); }
 
 // how the characters were laid out (on screen, as the player meant them)
 function detectLayout(cs, size) {
@@ -1092,10 +1161,7 @@ function analyze() {
     });
     if (best >= 0 && bd < Math.max(boxSize(gBox(groups[best])) * 0.6, brush * 4)) groups[best].push(d); else stray++;
   }
-  const chars = groups.map((g, gi) => {
-    // is it really the お題 character? (judged on the shape the player meant, so the swaying view doesn't count twice)
-    const rec = recognize(g.map(it => it.pts.map(q => ({ x: q.sx, y: q.sy }))), name[gi]);
-    const recog = recogFactor(rec);
+  const chars = groups.map(g => {
     const pts = [];
     for (const it of g) for (const q of it.pts) pts.push(q);
     const step = Math.max(1, Math.floor(pts.length / 400));
@@ -1116,7 +1182,7 @@ function analyze() {
     const avgLen = g.reduce((a, it) => a + it.len, 0) / g.length;
     const scribble = clamp(1 - (avgLen / Math.max(size, brush * 3) - 2.0) / 0.8, 0, 1);
     shape *= scribble;
-    return { sb, fb, sc: boxCenter(sb), fc: boxCenter(fb), size, shape, scribble, rec, recog };
+    return { sb, fb, sc: boxCenter(sb), fc: boxCenter(fb), size, shape, scribble };
   });
   const sizes = chars.map(c => c.size).sort((a, b) => a - b);
   const medSize = sizes.length ? sizes[sizes.length >> 1] : 0;
@@ -1158,19 +1224,23 @@ function analyze() {
     if (!c) return 0;
     return clamp(c.shape * (1 - 0.8 * coll[i]) * (present[i] ? 1 : 0.4) * (0.6 + 0.4 * strokeS), 0, 1);
   });
-  // ...and it only counts as the お題 character when it actually looks like it
-  const read = name.map((ch, i) => chars[i] ? legib[i] * chars[i].recog : 0);
-  const meanRead = read.reduce((a, b) => a + b, 0) / n;
-  // 冤罪: the writing is legible, but it is somebody else's name
+  // 1) Is it the お題 name at all? (whole-name check, lenient: any reasonable resemblance passes)
+  const toScreen = it => it.pts.map(q => ({ x: q.sx, y: q.sy }));
+  const nm = nameMatch(groups.map(g => g.map(toScreen)), odai, suspectsOf(lvl()),
+    [...items, ...minors].sort((a, b) => a.i - b.i).map(toScreen));
   const writtenN = chars.length;
   const legibMean = writtenN ? legib.slice(0, writtenN).reduce((a, b) => a + b, 0) / writtenN : 0;
-  const recogMean = writtenN ? chars.reduce((a, c) => a + c.recog, 0) / writtenN : 0;
-  const framed = count > 0 && legibMean >= 0.45 && recogMean < 0.35;
-  if (/[?&]debug/.test(location.search)) window.__judge = { groups: groups.map(g => g.map(it => it.i)), chars: chars.map(c => ({ shape: +c.shape.toFixed(2), scribble: +c.scribble.toFixed(2), size: Math.round(c.size), best: c.rec.best, recog: +c.recog.toFixed(2), sc: [Math.round(c.sc.x), Math.round(c.sc.y)] })), medSize, coll, present, legib, read, framed, strokeS, lenS, charsS, layoutS, orderS, spaceS, stray };
+  // 2) clearly somebody else's name → 冤罪 (if it is legible) / otherwise no clue at all
+  const framed = count > 0 && !nm.isOdai && legibMean >= 0.35;
+  // 3) the お題 name → the 解読率 is how legible it stayed on the floor
+  const read = nm.isOdai ? legib : legib.map(() => 0);
+  const meanRead = read.reduce((a, b) => a + b, 0) / n;
+  if (/[?&]debug/.test(location.search)) window.__judge = { groups: groups.map(g => g.map(it => it.i)), chars: chars.map(c => ({ shape: +c.shape.toFixed(2), scribble: +c.scribble.toFixed(2), size: Math.round(c.size), sc: [Math.round(c.sc.x), Math.round(c.sc.y)] })), name: { isOdai: nm.isOdai, better: nm.better, gapMean: +nm.gapMean.toFixed(3), closeChars: nm.closeChars, best: nm.per.map(p => p ? p.best : '-').join('') }, medSize, coll, present, legib, read, framed, strokeS, lenS, charsS, layoutS, orderS, spaceS, stray };
   const quality = 0.6 * meanRead + 0.4 * layoutS;
   let score = Math.round(100 * quality * (0.25 + 0.75 * complete) - Math.min(10, stray * 2));
   if (total < base * 0.15) score = Math.min(score, 3);
   if (framed) score = Math.min(score, 9);   // somebody else's name: neatly laid out, but it decodes nothing
+  else if (!nm.isOdai) score = Math.min(score, 24);   // not the name and hardly legible: no clue
   if (!count) score = 0;
   score = clamp(score, 0, 100);
   if (/[?&]debug=nan/.test(location.search)) score = NaN; // test switch for the 解読不能 screen
@@ -1181,10 +1251,9 @@ function analyze() {
 
   // AI decoding: a legible character is read as the お題 character if it matches, otherwise as what it looks like
   const decoded = name.map((ch, i) => {
-    const c = chars[i];
-    if (!c) return '？';
+    if (!chars[i]) return '？';
     const seen = legib[i] >= 0.6 || (legib[i] >= 0.4 && rnd() < (legib[i] - 0.4) * 5);
-    return !seen ? '？' : c.recog >= 0.5 ? ch : c.rec.best;
+    return !seen ? '？' : nm.isOdai ? ch : (nm.per[i] ? nm.per[i].best : '？');
   }).join('');
   const framedName = decoded.replace(/？/g, '') ? decoded : '身元不明の人物';
 
