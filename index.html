@@ -194,6 +194,11 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
 .rank{font-family:var(--brush);font-size:clamp(28px,8vw,40px);color:var(--ink);margin-top:4px}
 .rank small{font-size:.45em;color:#667;margin-right:8px;font-family:var(--sans);font-weight:700;letter-spacing:.1em}
 @media (max-width:480px){.f-item{grid-template-columns:1fr}}
+.share-mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:520px;margin:0 auto 12px}
+.share-mode .sm{padding:10px 8px;border-radius:10px;font-size:14px;font-weight:900;color:#556;background:#fff;border:2px solid #ddd5c5 !important;line-height:1.3}
+.share-mode .sm small{display:block;font-size:11px;font-weight:500;color:#889;margin-top:2px}
+.share-mode .sm.on{color:#fff;background:#1b2130;border-color:#1b2130 !important}
+.share-mode .sm.on small{color:#c7cbd6}
 .note{font-size:12px;color:#667;text-align:center;margin-top:10px;min-height:1.4em}
 .note .x-link{display:inline-block;margin-top:6px;padding:6px 12px;border-radius:8px;background:#000;color:#fff;font-weight:700;text-decoration:none}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%) translateY(20px);background:#1b2130;color:#fff;
@@ -296,6 +301,10 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
     </div>
     <div class="share">
       <h3>SNSシェアカード</h3>
+      <div class="share-mode" role="radiogroup" aria-label="投稿のしかた">
+        <button class="sm on" data-mode="answer" role="radio" aria-checked="true">答えつきで投稿<small>お題と見比べてギャップを楽しむ</small></button>
+        <button class="sm" data-mode="quiz" role="radio" aria-checked="false">クイズで出題<small>名前は隠してヒントだけ</small></button>
+      </div>
       <img id="cardImg" alt="シェア用カード画像">
       <div class="btns">
         <button class="btnX"><span class="x">𝕏</span>で警察（みんな）に解読してもらう</button>
@@ -900,6 +909,125 @@ function splitIntoChars(items, n) {
   for (let k = n, j = m; k >= 1; k--) { const i = cut[k][j]; groups.unshift(items.slice(i, j)); j = i; }
   return groups;
 }
+/* ---------- character recognition (is it really the お題 character?) ----------
+   Directional features: the character is laid on a grid and, for every spot, we note which way the
+   lines run (horizontal / vertical / two diagonals). Thin handwriting and thick print give the same
+   picture, so a written character can be compared with font-rendered candidates. The お題 character
+   counts as recognised when it ranks near the top among all candidates of its script. */
+const KATAKANA = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポ';
+const HIRAGANA = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ';
+const scriptOf = ch => /[ァ-ヶ]/.test(ch) ? 'kata' : /[ぁ-ゖ]/.test(ch) ? 'hira' : 'kanji';
+const candidatesOf = ch => { const s = scriptOf(ch); return [...(s === 'kata' ? KATAKANA : s === 'hira' ? HIRAGANA : Object.keys(KANJI_STROKES).join(''))]; };
+const RECOG_FONT = '"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif';
+const FN = 32;   // feature grid
+function addDir(planes, x, y, ang, w) {
+  const xi = Math.round(x), yi = Math.round(y);
+  if (xi < 0 || yi < 0 || xi >= FN || yi >= FN) return;
+  const b = ang / (Math.PI / 4), i0 = Math.floor(b) % 4, f = b - Math.floor(b);
+  planes[i0][yi * FN + xi] += w * (1 - f); planes[(i0 + 1) % 4][yi * FN + xi] += w * f;
+}
+function featureOf(planes) {   // blur, pool to 8x8 per direction, unit length
+  const out = new Float32Array(256);
+  planes.forEach((p, d) => {
+    let a = p;
+    for (let pass = 0; pass < 2; pass++) {
+      const b = new Float32Array(FN * FN);
+      for (let y = 0; y < FN; y++) for (let x = 0; x < FN; x++) {
+        let s = 0;
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const yy = y + dy, xx = x + dx;
+          if (yy >= 0 && xx >= 0 && yy < FN && xx < FN) s += a[yy * FN + xx];
+        }
+        b[y * FN + x] = s / 9;
+      }
+      a = b;
+    }
+    for (let y = 0; y < FN; y++) for (let x = 0; x < FN; x++) out[d * 64 + (y >> 2) * 8 + (x >> 2)] += a[y * FN + x];
+  });
+  let s = 0; for (const v of out) s += v * v; s = Math.sqrt(s) || 1;
+  for (let i = 0; i < out.length; i++) out[i] /= s;
+  return out;
+}
+const newPlanes = () => [0, 1, 2, 3].map(() => new Float32Array(FN * FN));
+// fit a box into the grid, keeping its shape, with a small margin
+const fitter = (x0, y0, w, h) => { const sz = Math.max(w, h, 1e-6), k = (FN - 6) / sz; return [k, (FN - w * k) / 2, (FN - h * k) / 2]; };
+function writtenFeature(strokeList) {   // strokeList: [[{x,y},...], ...] as the player meant them
+  const b = box0();
+  for (const s of strokeList) for (const p of s) boxAdd(b, p.x, p.y);
+  if (!isFinite(b.x0)) return null;
+  const [k, ox, oy] = fitter(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+  const P = newPlanes();
+  for (const s of strokeList) {
+    if (s.length === 1) { for (let d = 0; d < 4; d++) addDir(P, ox + (s[0].x - b.x0) * k, oy + (s[0].y - b.y0) * k, d * Math.PI / 4, 0.3); continue; }
+    // short strokes (dots of シ・ウ, dakuten) are blobs in print but tiny lines by hand: give them more weight
+    let sl = 0;
+    for (let i = 1; i < s.length; i++) sl += Math.hypot(s[i].x - s[i - 1].x, s[i].y - s[i - 1].y) * k;
+    const wt = 0.5 * clamp(11 / Math.max(sl, 0.1), 1, 4);
+    for (let i = 1; i < s.length; i++) {
+      const ax = ox + (s[i - 1].x - b.x0) * k, ay = oy + (s[i - 1].y - b.y0) * k;
+      const bx = ox + (s[i].x - b.x0) * k, by = oy + (s[i].y - b.y0) * k;
+      const len = Math.hypot(bx - ax, by - ay);
+      if (len < 1e-6) continue;
+      const ang = (Math.atan2(by - ay, bx - ax) + Math.PI) % Math.PI;
+      const n = Math.ceil(len * 2);
+      for (let t = 0; t <= n; t++) addDir(P, ax + (bx - ax) * t / n, ay + (by - ay) * t / n, ang, wt);
+    }
+  }
+  return featureOf(P);
+}
+const tplCache = new Map();
+let tplCtx = null;
+function templateFeature(ch) {
+  if (tplCache.has(ch)) return tplCache.get(ch);
+  const S = 64;
+  if (!tplCtx) { const c = document.createElement('canvas'); c.width = c.height = S; tplCtx = c.getContext('2d', { willReadFrequently: true }); }
+  const g = tplCtx;
+  g.clearRect(0, 0, S, S); g.fillStyle = '#000'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = `500 ${S * 0.82}px ${RECOG_FONT}`; g.fillText(ch, S / 2, S / 2);
+  const d = g.getImageData(0, 0, S, S).data, A = new Float32Array(S * S);
+  const b = box0();
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) { const v = d[(y * S + x) * 4 + 3] / 255; A[y * S + x] = v; if (v > 0.3) boxAdd(b, x, y); }
+  let f = null;
+  if (isFinite(b.x0)) {
+    const [k, ox, oy] = fitter(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+    const P = newPlanes();
+    for (let y = 1; y < S - 1; y++) for (let x = 1; x < S - 1; x++) {
+      const gx = A[y * S + x + 1] - A[y * S + x - 1], gy = A[(y + 1) * S + x] - A[(y - 1) * S + x];
+      const mag = Math.hypot(gx, gy);
+      if (mag < 0.15) continue;
+      const ang = (Math.atan2(gy, gx) + Math.PI / 2 + Math.PI * 2) % Math.PI;   // a stroke runs across its edge gradient
+      addDir(P, ox + (x - b.x0) * k, oy + (y - b.y0) * k, ang, mag);
+    }
+    f = featureOf(P);
+  }
+  tplCache.set(ch, f);
+  return f;
+}
+const dot256 = (a, b) => { let s = 0; for (let i = 0; i < 256; i++) s += a[i] * b[i]; return s; };
+// how well does the written character match `target`, compared with every other candidate?
+function recognize(strokeList, target) {
+  const f = writtenFeature(strokeList);
+  if (!f) return { pct: 0, best: '？' };
+  let st = -1, best = '？', bs = -2, below = 0, n = 0;
+  const sims = [];
+  for (const ch of candidatesOf(target)) {
+    const t = templateFeature(ch);
+    if (!t) continue;
+    const s = dot256(f, t);
+    sims.push(s);
+    if (ch === target) st = s;
+    if (s > bs) { bs = s; best = ch; }
+  }
+  if (st < -0.5) { const t = templateFeature(target); st = t ? dot256(f, t) : 0; }
+  let above = 0;
+  for (const s of sims) { n++; if (s < st) below++; else if (s > st) above++; }
+  return { pct: n > 1 ? below / (n - 1) : 0, rank: above, best, sim: st, bestSim: bs };
+}
+// recognised enough? full credit when the お題 character is within 0.04 of the best-matching candidate,
+// none from 0.10 on (tested on hand-drawn kana/kanji: right ≈ 86–97%, a different character ≈ 1–4%)
+const recogFactor = r => clamp(1 - ((r.bestSim - r.sim) - 0.04) / 0.06, 0, 1);
+if (/[?&]debug/.test(location.search)) window.__recognize = recognize;
+
 // how the characters were laid out (on screen, as the player meant them)
 function detectLayout(cs, size) {
   const n = cs.length;
@@ -1128,7 +1256,10 @@ function drawMarker(g, x, y, s, label) {
   g.fillText(label, s * .55, s * .55);
   g.restore();
 }
-function makeCard(ev, res) {
+// quiz hint: first character shown, the rest hidden (タナカ → タ〇〇)
+const odaiHint = name => [...name].map((ch, i) => i ? '〇' : ch).join('');
+// mode 'answer': the お題 is printed (the fun is the gap) / 'quiz': only a hint (others try to decode it)
+function makeCard(ev, res, mode = 'answer') {
   const c = document.createElement('canvas'); c.width = 1200; c.height = 1200;
   const g = c.getContext('2d');
   const BR = '"Yuji Syuku","Hiragino Mincho ProN","Yu Mincho",serif', SA = '"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif';
@@ -1159,7 +1290,19 @@ function makeCard(ev, res) {
   const ry = py + ph + 14 + 12;
   g.fillStyle = '#fff'; g.fillRect(px, ry, 420, 30); g.strokeStyle = '#1b2130'; g.lineWidth = 2; g.strokeRect(px, ry, 420, 30);
   for (let i = 0; i <= 20; i++) { g.fillStyle = '#1b2130'; g.fillRect(px + i * 21, ry, 2, i % 5 === 0 ? 18 : 10); }
-  g.textAlign = 'left'; g.font = `500 18px ${SA}`; g.fillStyle = '#556'; g.fillText('現場床面に遺された血文字（全貌）', px + 440, ry + 16);
+  // the お題 next to the ruler: the answer, or only a hint in quiz mode
+  {
+    const label = mode === 'quiz' ? 'お題（ヒント）' : 'お題';
+    const body = mode === 'quiz' ? `「${odaiHint(res.odai)}」${res.stageType}` : `「${res.odai}」${res.stageType}`;
+    const maxW = 1140 - (px + 440);
+    let fs = 30;
+    const fit = () => { g.font = `700 ${fs}px ${SA}`; return g.measureText(label + ' ' + body).width; };
+    while (fit() > maxW && fs > 16) fs--;
+    g.textAlign = 'left'; g.textBaseline = 'middle';
+    g.fillStyle = '#c3121d'; g.fillText(label, px + 440, ry + 16);
+    const lw = g.measureText(label + ' ').width;
+    g.fillStyle = '#1b2130'; g.fillText(body, px + 440 + lw, ry + 16);
+  }
   // score
   const sy = 960;
   g.fillStyle = '#556'; g.font = `700 28px ${SA}`; g.textAlign = 'left'; g.fillText('解読率', 60, sy);
@@ -1191,7 +1334,8 @@ function makeCard(ev, res) {
   // footer
   g.fillStyle = '#1b2130'; g.fillRect(0, 1160, 1200, 40);
   g.fillStyle = '#fff'; g.font = `700 20px ${SA}`; g.textAlign = 'center';
-  g.fillText('#ダイイングカリグラフィー　─　警察（みんな）、解読してください', 600, 1181);
+  g.fillText(mode === 'quiz' ? '#ダイイングカリグラフィー　─　警察（みんな）、犯人の名前を解読してください'
+    : '#ダイイングカリグラフィー　─　お題と見比べてみてください', 600, 1181);
   return c;
 }
 
@@ -1216,16 +1360,38 @@ async function loadFonts(texts) {
 async function buildResult() {
   const r = analyze();
   // free the previous round's photo and card right away (Safari counts every live canvas against its memory cap)
-  for (const old of [evCanvas, cardCanvas]) if (old) { old.width = 0; old.height = 0; }
+  for (const old of [evCanvas, cardCanvas, quizCanvas]) if (old) { old.width = 0; old.height = 0; }
   evCanvas = makeEvidence();
-  await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub);
-  cardCanvas = makeCard(evCanvas, r);
+  await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub + r.odai + r.stageType + 'お題ヒント〇見比べてみ');
+  cardCanvas = makeCard(evCanvas, r, 'answer');
+  quizCanvas = makeCard(evCanvas, r, 'quiz');
   $('#evImg').src = evCanvas.toDataURL('image/jpeg', 0.9);
   saveBest(r);
-  $('#cardImg').src = cardCanvas.toDataURL('image/png');
-  setShare(cardCanvas, stageShareText(r), `dying-message-${r.no}.png`);
+  // both cards are ready before the result shows, so switching modes and sharing work instantly
+  shareModes = {
+    answer: { url: cardCanvas.toDataURL('image/png'), ctx: makeShareCtx(cardCanvas, stageShareText(r, 'answer'), `dying-message-${r.no}.png`) },
+    quiz: { url: quizCanvas.toDataURL('image/png'), ctx: makeShareCtx(quizCanvas, stageShareText(r, 'quiz'), `dying-message-quiz-${r.no}.png`) },
+  };
+  applyShareMode(shareMode);
   result = r;
 }
+// answer / quiz switch on the result screen (the choice is kept for the next rounds)
+let shareMode = 'answer', shareModes = null, quizCanvas = null;
+function applyShareMode(mode) {
+  shareMode = mode;
+  document.querySelectorAll('.share-mode .sm').forEach(b => {
+    const on = b.dataset.mode === mode;
+    b.classList.toggle('on', on); b.setAttribute('aria-checked', on);
+  });
+  const bx = $('#result .btnX');
+  if (bx) bx.innerHTML = '<span class="x">𝕏</span>' + (mode === 'quiz' ? 'で警察（みんな）に解読してもらう' : 'でお題と一緒に投稿する');
+  if (!shareModes) return;
+  $('#cardImg').src = shareModes[mode].url;
+  shareCtx = shareModes[mode].ctx;
+  document.querySelectorAll('.note').forEach(n => n.textContent = '');
+}
+document.querySelectorAll('.share-mode .sm').forEach(b => b.addEventListener('click', () => applyShareMode(b.dataset.mode)));
+applyShareMode(shareMode);
 
 function countUp(numEl, meterEl, stampEl, commentEl, score, delay) {
   commentEl.classList.remove('on'); stampEl.classList.remove('on');
@@ -1301,13 +1467,17 @@ function toast(t) {
   clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('on'), 3800);
 }
 const withUrl = t => /^https?:/.test(location.protocol) ? t + '\n' + location.href.split(/[?#]/)[0] : t;
-function stageShareText(r) {
-  return withUrl(`${r.stageName}（${r.stageType}・${r.sec}秒）で、瀕死の私が遺したダイイングメッセージ。\n捜査結果【${r.verdict}】解読率 ${r.unreadable ? '解読不能' : r.score + '%'}\n警察（みんな）、犯人の名前を解読してください🩸\n#ダイイングカリグラフィー`);
+function stageShareText(r, mode) {
+  const rate = r.unreadable ? '解読不能' : r.score + '%';
+  if (mode === 'quiz') {
+    return withUrl(`${r.stageName}（${r.stageType}・${r.sec}秒）で、瀕死の私が遺したダイイングメッセージ。\nヒント：「${odaiHint(r.odai)}」\n捜査結果【${r.verdict}】解読率 ${rate}\n警察（みんな）、犯人の名前を解読してください🩸\n#ダイイングカリグラフィー`);
+  }
+  return withUrl(`瀕死の私が「${r.odai}」と書いたつもりの血文字がこちら。\n${r.stageName}（${r.stageType}・${r.sec}秒）\n捜査結果【${r.verdict}】解読率 ${rate}\n#ダイイングカリグラフィー`);
 }
-function setShare(canvas, text, name) {
+function makeShareCtx(canvas, text, name) {
   const ctx = { canvas, blob: null, text, name };
-  shareCtx = ctx;
   canvas.toBlob(b => { ctx.blob = b; }, 'image/png');
+  return ctx;
 }
 function downloadCard() {
   const s = shareCtx, a = document.createElement('a');
@@ -1319,7 +1489,7 @@ function downloadCard() {
 function shareX() {
   const s = shareCtx;
   if (!s) return;
-  track('share_x', { screen: state });
+  track('share_x', { screen: state, mode: shareMode });
   const isTouch = matchMedia('(pointer:coarse)').matches;
   // Mobile: native share sheet with the image attached (pick X there)
   if (isTouch && s.blob && navigator.canShare) {
