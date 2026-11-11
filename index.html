@@ -272,8 +272,8 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
     <h2>カスタム事件</h2>
     <p class="cu-lead">好きな言葉を、好きな秒数で。<br>推しに刺されても、創作キャラになりきっても。</p>
     <div class="cu-f">
-      <label for="cuText">遺す言葉 <small id="cuCount">0 / 12文字</small></label>
-      <input type="text" id="cuText" maxlength="24" placeholder="例：犯人はヤス" autocomplete="off">
+      <label for="cuText">遺す言葉 <small id="cuCount">0 / 20文字</small></label>
+      <input type="text" id="cuText" maxlength="40" placeholder="例：犯人はヤス" autocomplete="off">
     </div>
     <div class="cu-f">
       <label for="cuVictim">被害者の名前 <small>任意・鑑定書にのります</small></label>
@@ -430,7 +430,7 @@ const CUSTOM_LEVELS = [
   { label: '腕が重い', sway: 1.0, speed: 0.85 },
   { label: '腕がとても重い', sway: 1.25, speed: 0.7 },
 ];
-const CUSTOM_MAX = 12, CUSTOM_SEC = [3, 30];
+const CUSTOM_MAX = 20, CUSTOM_SEC = [3, 30];
 const lvl = () => customStage || STAGES[stageIdx];
 // a finger writes far more naturally than a mouse, so touch play gets a heavier handicap
 const TOUCH = { sway: 1.4, speed: 0.8 };
@@ -834,11 +834,16 @@ function resetGame() {
   $('#odai2').textContent = odai;
   // long words shrink so they stay on one line on a phone
   const nlen = [...odai].length, o2 = $('#odai2').style;
-  if (nlen > 5) { o2.fontSize = `clamp(20px,${Math.floor(70 / nlen)}vw,64px)`; o2.letterSpacing = '.04em'; o2.whiteSpace = 'nowrap'; o2.padding = '4px 16px'; }
+  // (over 12 characters the words go on two lines)
+  o2.maxWidth = '';
+  if (nlen > 12) { const per = Math.ceil(nlen / 2); o2.fontSize = `clamp(18px,${Math.floor(70 / per)}vw,52px)`; o2.letterSpacing = '.04em'; o2.whiteSpace = 'normal'; o2.padding = '6px 16px'; o2.maxWidth = `calc(${per + 1}em + 32px)`; }
+  else if (nlen > 5) { o2.fontSize = `clamp(20px,${Math.floor(70 / nlen)}vw,64px)`; o2.letterSpacing = '.04em'; o2.whiteSpace = 'nowrap'; o2.padding = '4px 16px'; }
   else { o2.fontSize = o2.letterSpacing = o2.whiteSpace = o2.padding = ''; }
   $('#stageSec').textContent = st.sec;
   $('#hudOdai').innerHTML = `${st.name}　${st.custom ? '遺す言葉' : '犯人'}<b></b>`;
   $('#hudOdai b').textContent = odai;
+  // long custom words: smaller HUD text and no label, so it stays on one line during play
+  if ([...odai].length > 10) { $('#hudOdai').textContent = ''; const hb = document.createElement('b'); hb.textContent = odai; hb.style.cssText = 'font-size:13px;margin:0;letter-spacing:0'; $('#hudOdai').appendChild(hb); }
   $('#slow').classList.remove('on');
   ready.style.display = 'flex';
 }
