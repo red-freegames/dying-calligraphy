@@ -284,8 +284,12 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
       <input type="range" id="cuSec" min="3" max="30" step="1" value="10">
     </div>
     <div class="cu-f">
-      <span class="lb">腕の重さ・視界の揺れ</span>
+      <span class="lb">腕の重さ <small>書ける速さ</small></span>
       <div class="cu-lv" id="cuLv" role="radiogroup" aria-label="腕の重さ"></div>
+    </div>
+    <div class="cu-f">
+      <span class="lb">視界の悪さ <small>暗くなる早さ・揺れ</small></span>
+      <div class="cu-lv" id="cuVis" role="radiogroup" aria-label="視界の悪さ"></div>
     </div>
     <p class="cu-note">※ カスタム事件ではAI鑑識による解読は行いません。書こうとした形が、揺れる視界でどれだけ崩れずに残ったかを「再現度」として鑑定します。<br>※ 記録（最高記録）には残りません。</p>
     <div class="cu-btns">
@@ -425,11 +429,21 @@ const strokesOf = name => [...name].reduce((a, ch) => a + (KANJI_STROKES[ch] || 
 let stageIdx = 0, T = STAGES[0].sec, odaiStrokes = 0;
 // custom case: the player sets the words, the time and how heavy the arm is (no AI decoding)
 let customStage = null;
+// arm = how fast the hand can move / vision = how much the floor sways and how soon (and how far) the world goes dark
 const CUSTOM_LEVELS = [
-  { label: '腕が少し重い', sway: 0.6, speed: 0.95 },
-  { label: '腕が重い', sway: 1.0, speed: 0.85 },
-  { label: '腕がとても重い', sway: 1.25, speed: 0.7 },
+  { label: '腕が少し重い', speed: 0.95 },
+  { label: '腕が重い', speed: 0.85 },
+  { label: '腕がとても重い', speed: 0.7 },
 ];
+const CUSTOM_VISION = [
+  // d = share of the time that stays clear before it starts to dim, cap = how far it gets (1 = all the way to black)
+  // blink = how often the momentary blackouts come (1 = as in the normal cases)
+  { label: '少しかすむ', sway: 0.6, vis: { d: 0.35, cap: 0.72, blink: 0.25 } },
+  { label: '暗く揺れる', sway: 0.9, vis: { d: 0.15, cap: 0.88, blink: 0.6 } },
+  { label: '闇に沈む', sway: 1.25, vis: { d: 0, cap: 1, blink: 1 } },
+];
+// how far the vision has gone (0 = clear … 1 = nearly black); the normal cases follow the time as it is
+const visP = t => { const v = lvl().vis; return v ? clamp((t - v.d) / (1 - v.d), 0, 1) * v.cap : t; };
 const CUSTOM_MAX = 20, CUSTOM_SEC = [3, 30];
 const lvl = () => customStage || STAGES[stageIdx];
 // a finger writes far more naturally than a mouse, so touch play gets a heavier handicap
@@ -634,7 +648,7 @@ function lurch(mag) {
   view.lvx += Math.cos(a) * mag * 0.1; view.lvy += Math.sin(a) * mag * 0.1;
 }
 function updateView(now) {
-  const p = state === 'play' ? clamp(elapsed / T, 0, 1) : 0, sw = swayOf();
+  const p = state === 'play' ? visP(clamp(elapsed / T, 0, 1)) : 0, sw = swayOf();
   const t = now / 1000, ph = view.ph;
   const A = base * (0.004 + 0.15 * Math.pow(p, 1.4)) * sw;
   view.A = A;
@@ -750,7 +764,8 @@ function renderNoise() {
   nctx.putImageData(noiseImg, 0, 0);
 }
 function updateFx(now) {
-  const p = clamp(elapsed / T, 0, 1), r = 1 - p, sw = swayOf();
+  // the life bar follows the real time; every vision effect follows how far the vision has gone
+  const pt = clamp(elapsed / T, 0, 1), r = 1 - pt, p = visP(pt), sw = swayOf();
   const kDark = Math.pow(p, 1.15);                 // steadily going dark from the first second
   const k1 = clamp((p - 0.25) / 0.75, 0, 1);       // tunnel vision
   const k2 = clamp((p - 0.45) / 0.55, 0, 1);       // blur, own ink fading
@@ -769,7 +784,7 @@ function updateFx(now) {
   pulse *= 0.9;
 
   // blackouts: consciousness flickers out for a moment, and the world has moved when it returns
-  if (!blink && p > 0.25 && rnd() < (0.003 + 0.022 * p * p) * sw) {
+  if (!blink && p > 0.25 && rnd() < (0.003 + 0.022 * p * p) * sw * (lvl().vis ? lvl().vis.blink : 1)) {
     blink = { t: now, d: (0.25 + 0.75 * p) * 1000 };
     lurch(view.A * 1.5);
   }
@@ -1874,7 +1889,7 @@ renderStageList();
 /* ---------- custom case setup ---------- */
 // the settings travel in the URL fragment (#c=…, base64url JSON) so a link can be shared without the
 // words sitting in plain sight; nothing is sent to a server
-const cu = { text: '', victim: '', sec: 10, lv: 1 };
+const cu = { text: '', victim: '', sec: 10, lv: 1, vis: 1 };
 // spaces, control characters and invisible direction/zero-width marks are dropped (built from code points on purpose)
 const BAD_CHARS = new RegExp('[' + [[0, 31], [127, 127], [0x200b, 0x200f], [0x2028, 0x202e]].map(([a, b]) => String.fromCharCode(a) + '-' + String.fromCharCode(b)).join('') + ']', 'g');
 const cleanText = (s, max) => [...String(s || '').replace(/\s+/g, '').replace(BAD_CHARS, '')].slice(0, max).join('');
@@ -1882,7 +1897,7 @@ const b64e = s => { const b = new TextEncoder().encode(s); let t = ''; b.forEach
 const b64d = s => { const t = atob(s.replace(/-/g, '+').replace(/_/g, '/')); return new TextDecoder().decode(Uint8Array.from(t, c => c.charCodeAt(0))); };
 function customUrl() {
   const base = location.href.split(/[?#]/)[0];
-  return base + '#c=' + b64e(JSON.stringify({ w: cu.text, v: cu.victim || undefined, t: cu.sec, d: cu.lv }));
+  return base + '#c=' + b64e(JSON.stringify({ w: cu.text, v: cu.victim || undefined, t: cu.sec, d: cu.lv, e: cu.vis }));
 }
 function readCustomHash() {
   const m = /[#&]c=([A-Za-z0-9_-]+)/.exec(location.hash);
@@ -1893,6 +1908,7 @@ function readCustomHash() {
     cu.victim = cleanText(o.v, 12);
     cu.sec = clamp(Math.round(+o.t) || 10, CUSTOM_SEC[0], CUSTOM_SEC[1]);
     cu.lv = clamp(Math.round(+o.d) || 0, 0, CUSTOM_LEVELS.length - 1);
+    cu.vis = o.e === undefined ? 1 : clamp(Math.round(+o.e) || 0, 0, CUSTOM_VISION.length - 1);   // links made before this option: the middle
     return !!cu.text;
   } catch (e) { return false; }
 }
@@ -1901,14 +1917,17 @@ function syncCustomForm() {
   $('#cuSec').value = cu.sec; $('#cuSecV').textContent = cu.sec;
   $('#cuCount').textContent = `${[...cu.text].length} / ${CUSTOM_MAX}文字`;
   document.querySelectorAll('#cuLv button').forEach((b, i) => { b.classList.toggle('on', i === cu.lv); b.setAttribute('aria-checked', i === cu.lv); });
+  document.querySelectorAll('#cuVis button').forEach((b, i) => { b.classList.toggle('on', i === cu.vis); b.setAttribute('aria-checked', i === cu.vis); });
   $('#cuGo').disabled = !cu.text;
 }
-CUSTOM_LEVELS.forEach((l, i) => {
+const levelButtons = (list, box, key) => list.forEach((l, i) => {
   const b = document.createElement('button');
   b.textContent = l.label; b.setAttribute('role', 'radio');
-  b.addEventListener('click', () => { cu.lv = i; syncCustomForm(); });
-  $('#cuLv').appendChild(b);
+  b.addEventListener('click', () => { cu[key] = i; syncCustomForm(); });
+  $(box).appendChild(b);
 });
+levelButtons(CUSTOM_LEVELS, '#cuLv', 'lv');
+levelButtons(CUSTOM_VISION, '#cuVis', 'vis');
 // never rewrite the field while the IME is still composing (Japanese / Chinese input), only once it is committed
 const bindText = (el, max, set) => {
   const apply = () => { const v = cleanText(el.value, max); if (v !== el.value) el.value = v; set(v); };
@@ -1921,9 +1940,9 @@ $('#cuSec').addEventListener('input', e => { cu.sec = +e.target.value; $('#cuSec
 function openCustom() { state = 'custom'; customStage = null; syncCustomForm(); show('custom'); scr.custom.scrollTop = 0; }
 function startCustom() {
   if (!cu.text) return;
-  const lv = CUSTOM_LEVELS[cu.lv], n = [...cu.text].length;
-  customStage = { custom: true, name: 'カスタム事件', type: `${n}文字・${lv.label}`, sec: cu.sec, sway: lv.sway, speed: lv.speed,
-    len: 0.4 * n, odai: [cu.text], victim: cu.victim };
+  const lv = CUSTOM_LEVELS[cu.lv], vs = CUSTOM_VISION[cu.vis], n = [...cu.text].length;
+  customStage = { custom: true, name: 'カスタム事件', type: `${n}文字・${lv.label}・視界：${vs.label}`, sec: cu.sec,
+    sway: vs.sway, vis: vs.vis, speed: lv.speed, len: 0.4 * n, odai: [cu.text], victim: cu.victim };
   try { history.replaceState(null, '', customUrl()); } catch (e) {}
   enterGame();
 }
