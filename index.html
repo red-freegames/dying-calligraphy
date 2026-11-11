@@ -60,6 +60,34 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
 .t-stage .best{grid-column:1/-1;font-size:12px;color:#ffd23a;font-weight:700}
 .t-stage .best.none{color:#c9a9a9;font-weight:500}
 .t-note{font-size:12px;color:#866}
+/* custom case */
+.t-custom{width:100%;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 12px;padding:14px 18px;border-radius:14px;text-align:left;color:#fff;
+  background:rgba(255,255,255,.05);border:1px dashed rgba(255,170,175,.6);transition:transform .12s}
+.t-custom:active{transform:scale(.97)}
+.t-custom b{font-family:var(--brush);font-weight:400;font-size:20px}
+.t-custom span{font-size:12px;color:#e6caca}
+.t-custom em{font-style:normal;grid-row:1/3;grid-column:2;font-size:13px;font-weight:900;color:#ffd7d9}
+#custom{background:radial-gradient(ellipse at 50% 20%,#2a0709 0%,#0b0505 70%);overflow-y:auto}
+.cu-inner{max-width:520px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 32px) 20px 40px;display:grid;gap:16px;color:#efe6e6}
+.cu-inner h2{font-family:var(--brush);font-weight:400;font-size:clamp(30px,8vw,42px);color:var(--blood2);text-align:center;text-shadow:0 0 16px rgba(195,18,29,.45)}
+.cu-lead{font-family:var(--brush);text-align:center;line-height:1.8;font-size:16px;color:#e6d6d6}
+.cu-f{display:grid;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 16px}
+.cu-f > label,.cu-f > .lb{font-size:14px;font-weight:900;color:#fff;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.cu-f small{font-size:12px;font-weight:500;color:#c9a9a9}
+.cu-f input[type=text]{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:#1a0d0e;color:#fff;font-size:18px;font-family:var(--brush)}
+.cu-f input[type=text]:focus{outline:2px solid var(--blood2);border-color:transparent}
+.cu-f input[type=range]{width:100%;accent-color:#d01622}
+.cu-sec{font-size:22px;font-weight:900;color:#ffd7d9}
+.cu-lv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cu-lv button{padding:10px 4px;border-radius:10px;font-size:13px;font-weight:900;color:#e6caca;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2)}
+.cu-lv button.on{color:#fff;background:linear-gradient(90deg,#d01622,#8a0612);border-color:#ff5a62}
+.cu-note{font-size:12px;color:#b39999;line-height:1.7}
+.cu-btns{display:grid;gap:10px}
+.cu-btns button{padding:15px;border-radius:12px;font-size:16px;font-weight:900;color:#fff;border:0}
+#cuGo{background:linear-gradient(90deg,#d01622,#8a0612);box-shadow:0 6px 22px rgba(208,22,34,.4)}
+#cuGo:disabled{opacity:.4;box-shadow:none}
+#cuLink{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.3) !important}
+#cuBack{background:transparent;color:#c9a9a9 !important;font-size:14px !important;border:1px solid rgba(255,255,255,.15) !important}
 /* ===== RED FREE GAMES 共通：他のゲーム・要望フォーム・フッター ===== */
 .t-more{display:block;width:100%;max-width:340px;padding:14px;border-radius:999px;text-align:center;text-decoration:none;font-weight:900;font-size:17px;
   color:#fff;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.35)}
@@ -226,6 +254,7 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
     </ul>
     <p class="t-pick">どの事件で刺される？</p>
     <div class="t-stages" id="stageList"></div>
+    <button class="t-custom" id="btnCustom"><b>✍ カスタム事件</b><em>設定する ▶</em><span>好きな言葉を、好きな秒数で遺す（判定なし）</span></button>
     <p class="t-note">※ 音が出ます（心音・鑑識フラッシュ）／横書き・縦書き・2文字ずつ、どの書き方でもOK</p>
     <a class="t-more" href="https://red-freegames.github.io/">🎮 他のゲームを見る</a>
     <a class="fb-link" id="fbTitle" target="_blank" rel="noopener">💬 要望・バグ報告はこちら</a>
@@ -234,6 +263,36 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
       <span>配信・動画利用大歓迎！商用利用OK</span>
       <a class="pv" href="https://red-freegames.github.io/privacy.html" target="_blank" rel="noopener">プライバシー</a>
     </footer>
+  </div>
+</section>
+
+<!-- ====== CUSTOM CASE SETUP ====== -->
+<section id="custom" class="screen">
+  <div class="cu-inner">
+    <h2>カスタム事件</h2>
+    <p class="cu-lead">好きな言葉を、好きな秒数で。<br>推しに刺されても、創作キャラになりきっても。</p>
+    <div class="cu-f">
+      <label for="cuText">遺す言葉 <small id="cuCount">0 / 12文字</small></label>
+      <input type="text" id="cuText" maxlength="24" placeholder="例：犯人はヤス" autocomplete="off">
+    </div>
+    <div class="cu-f">
+      <label for="cuVictim">被害者の名前 <small>任意・鑑定書にのります</small></label>
+      <input type="text" id="cuVictim" maxlength="16" placeholder="例：名探偵" autocomplete="off">
+    </div>
+    <div class="cu-f">
+      <label for="cuSec">制限時間 <span class="cu-sec"><span id="cuSecV">10</span>秒</span></label>
+      <input type="range" id="cuSec" min="3" max="30" step="1" value="10">
+    </div>
+    <div class="cu-f">
+      <span class="lb">腕の重さ・視界の揺れ</span>
+      <div class="cu-lv" id="cuLv" role="radiogroup" aria-label="腕の重さ"></div>
+    </div>
+    <p class="cu-note">※ カスタム事件ではAI鑑識による解読は行いません。書こうとした形が、揺れる視界でどれだけ崩れずに残ったかを「再現度」として鑑定します。<br>※ 記録（最高記録）には残りません。</p>
+    <div class="cu-btns">
+      <button id="cuGo" disabled>刺される ▶</button>
+      <button id="cuLink">この設定で遊べるURLをコピー</button>
+      <button id="cuBack">事件の一覧に戻る</button>
+    </div>
   </div>
 </section>
 
@@ -279,7 +338,7 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
       <figcaption id="evCap"></figcaption>
     </figure>
     <div class="score-box">
-      <div class="label">解読率（AI鑑識）</div>
+      <div class="label" id="scoreLabel">解読率（AI鑑識）</div>
       <div class="score"><span id="scoreNum">0</span><small>%</small></div>
       <div class="meter"><i id="meterFill"></i></div>
       <div class="stamp" id="stamp">鑑定済</div>
@@ -288,11 +347,11 @@ h1 small{display:block;font-size:.42em;color:#e9dcdc;letter-spacing:.35em;margin
     <dl class="stats">
       <div><dt>文字の形の崩れにくさ</dt><dd id="stShape">-</dd></div>
       <div><dt>文字どうしの配置</dt><dd id="stLayout">-</dd></div>
-      <div><dt>画数（お手本）</dt><dd id="stCount">-</dd></div>
+      <div><dt id="stCountL">画数（お手本）</dt><dd id="stCount">-</dd></div>
       <div><dt>書き方（自動判定）</dt><dd id="stDir">-</dd></div>
       <div class="wide"><dt>文字ごとの判読度</dt><dd id="stChars" class="chars">-</dd></div>
       <div class="wide"><dt>AI鑑識による解読</dt><dd id="stGuess">-</dd></div>
-      <div class="wide"><dt>本人が書いたつもりの名前（お題）</dt><dd id="stOdai">-</dd></div>
+      <div class="wide"><dt id="stOdaiL">本人が書いたつもりの名前（お題）</dt><dd id="stOdai">-</dd></div>
     </dl>
     <div class="next-top btns">
       <button id="btnNext">次の事件へ ▶</button>
@@ -364,7 +423,15 @@ const KANJI_STROKES = {};
 ].forEach(([n, s]) => { for (const ch of s) KANJI_STROKES[ch] = n; });
 const strokesOf = name => [...name].reduce((a, ch) => a + (KANJI_STROKES[ch] || 8), 0);
 let stageIdx = 0, T = STAGES[0].sec, odaiStrokes = 0;
-const lvl = () => STAGES[stageIdx];
+// custom case: the player sets the words, the time and how heavy the arm is (no AI decoding)
+let customStage = null;
+const CUSTOM_LEVELS = [
+  { label: '腕が少し重い', sway: 0.6, speed: 0.95 },
+  { label: '腕が重い', sway: 1.0, speed: 0.85 },
+  { label: '腕がとても重い', sway: 1.25, speed: 0.7 },
+];
+const CUSTOM_MAX = 12, CUSTOM_SEC = [3, 30];
+const lvl = () => customStage || STAGES[stageIdx];
 // a finger writes far more naturally than a mouse, so touch play gets a heavier handicap
 const TOUCH = { sway: 1.4, speed: 0.8 };
 let touchMode = matchMedia("(pointer: coarse)").matches;
@@ -372,7 +439,7 @@ const swayOf = () => lvl().sway * (touchMode ? TOUCH.sway : 1);
 const speedOf = () => lvl().speed * (touchMode ? TOUCH.speed : 1);
 
 /* ---------- elements ---------- */
-const scr = { title: $('#title'), game: $('#game'), result: $('#result') };
+const scr = { title: $('#title'), custom: $('#custom'), game: $('#game'), result: $('#result') };
 const game = $('#game'), stage = $('#stage');
 const bg = $('#bg'), ink = $('#ink'), pen = $('#pen'), noise = $('#noise');
 const bctx = bg.getContext('2d'), ictx = ink.getContext('2d'), pctx = pen.getContext('2d'), nctx = noise.getContext('2d');
@@ -763,10 +830,14 @@ function resetGame() {
   T = st.sec;
   $('#lifeFill').style.transform = 'scaleX(1)'; $('#timer').textContent = T.toFixed(1);
   $('#stageNo').textContent = st.name;
-  $('#stageType').textContent = `犯人の名前（${st.type}）`;
+  $('#stageType').textContent = st.custom ? `遺す言葉（${st.type}）` : `犯人の名前（${st.type}）`;
   $('#odai2').textContent = odai;
+  // long words shrink so they stay on one line on a phone
+  const nlen = [...odai].length, o2 = $('#odai2').style;
+  if (nlen > 5) { o2.fontSize = `clamp(20px,${Math.floor(70 / nlen)}vw,64px)`; o2.letterSpacing = '.04em'; o2.whiteSpace = 'nowrap'; o2.padding = '4px 16px'; }
+  else { o2.fontSize = o2.letterSpacing = o2.whiteSpace = o2.padding = ''; }
   $('#stageSec').textContent = st.sec;
-  $('#hudOdai').innerHTML = `${st.name}　犯人<b></b>`;
+  $('#hudOdai').innerHTML = `${st.name}　${st.custom ? '遺す言葉' : '犯人'}<b></b>`;
   $('#hudOdai b').textContent = odai;
   $('#slow').classList.remove('on');
   ready.style.display = 'flex';
@@ -785,8 +856,8 @@ function enterGame() {
 }
 function startPlay(now) {
   state = 'play'; t0 = now; ready.style.display = 'none';
-  track('game_start', { stage: stageIdx + 1 });
-  setMsg('犯人の名を……遺さねば……');
+  track('game_start', { stage: customStage ? 'custom' : stageIdx + 1 });
+  setMsg(customStage ? '最期の言葉を……遺さねば……' : '犯人の名を……遺さねば……');
 }
 function die() {
   state = 'dying';
@@ -830,7 +901,20 @@ const VERDICTS = [
   [85, '犯人逮捕確実', '逮捕状が請求されました', true, [
     '逮捕状が即日発行されました。', '犯人が血文字を見て、その場で自白しました。', '死してなお、犯人を追い詰めました。', '刑事たちがあなたの遺志に敬礼しました。']],
 ];
-const verdictOf = s => { let v = VERDICTS[0]; for (const x of VERDICTS) if (s >= x[0]) v = x; return v; };
+const verdictOf = (s, list = VERDICTS) => { let v = list[0]; for (const x of list) if (s >= x[0]) v = x; return v; };
+// custom case: no decoding, only how well the words kept their shape on the floor (再現度)
+const CUSTOM_VERDICTS = [
+  [0, '血の跡だけ', '最期の言葉は闇に消えました', false, [
+    '床に謎の模様が残されました。', '鑑識が「何かの儀式？」と首をかしげています。', '見た人の想像力に、すべてが託されました。', '考察班が三日三晩、議論を続けています。']],
+  [25, 'かすかな痕跡', '読めそうで、読めません', false, [
+    '「たぶん、あの言葉…？」と噂になっています。', '読めない。だが、想いの重さだけは伝わる。', '解釈違いで論争が起きています。', '残された者たちが必死に読み解こうとしています。']],
+  [45, 'なんとか判読', '想いは半分くらい届きました', false, [
+    '目を細めれば、ちゃんと読めます。', 'あと少しだけ力が残っていれば…。', '見た人の涙で、少しにじみました。', '最期の力は、確かにそこにありました。']],
+  [65, '確かに読める', '最期の言葉は届きました', true, [
+    '瀕死とは思えない筆跡です。', '残された言葉が、物語の続きを紡ぎます。', 'その場にいた全員が息をのみました。', '刺した相手も、思わず読み上げました。']],
+  [85, '完璧に遺した', '最期の言葉が、はっきりと刻まれた', true, [
+    '死の間際に、最高傑作が生まれました。', 'この血文字は語り継がれるでしょう。', '書道家がスカウトに来ました。（手遅れ）', '公式が拾うレベルの最期です。']],
+];
 const GUESS_LO = ['「カレーうどん」', '「明日は燃えるゴミ」', '古代文字の一種', '「たぶん、左」', '地図（宝のありか？）', '「ア」または猫の後ろ姿', '福笑い（失敗）'];
 /* =====================================================================
    判定（AI鑑識）
@@ -1217,6 +1301,7 @@ function analyze() {
   const present = chars.map(c => c.size >= medSize * 0.35);
   const charsS = present.filter(Boolean).length / n;
   const complete = 0.45 * strokeS + 0.25 * lenS + 0.3 * charsS;
+  if (lvl().custom) return analyzeCustom({ name, n, chars, coll, present, charsS, layoutS, total, stray, count, medSize });
 
   // how legible each character is on the floor (missing ones read as 0)...
   const legib = name.map((ch, i) => {
@@ -1285,6 +1370,39 @@ function analyze() {
     cm: (total / 37.8).toFixed(1), driftCm: (view.maxD / 37.8).toFixed(1),
     no: String(Math.floor(rnd(1000, 9999))), odai,
     stageIdx, stageName: lvl().name, stageType: lvl().type, sec: lvl().sec,
+    date: new Date(),
+  };
+}
+
+// custom case: any words in any script, so nothing is decoded. The 再現度 is only how well each character kept
+// its shape on the floor, how the characters sit together, and whether everything got written.
+function analyzeCustom({ name, n, chars, coll, present, charsS, layoutS, total, stray, count, medSize }) {
+  const fin = v => Number.isFinite(v) ? v : 0;
+  const lenC = clamp(total / (base * lvl().len), 0, 1);
+  const leg = name.map((ch, i) => { const c = chars[i]; return c ? clamp(c.shape * (1 - 0.8 * coll[i]) * (present[i] ? 1 : 0.4), 0, 1) : 0; });
+  const meanLeg = leg.reduce((a, b) => a + b, 0) / n;
+  const comp = 0.6 * charsS + 0.4 * lenC;
+  let score = Math.round(100 * (0.6 * meanLeg + 0.4 * layoutS) * (0.25 + 0.75 * comp) - Math.min(10, stray * 2));
+  if (total < base * 0.15) score = Math.min(score, 3);
+  if (!count) score = 0;
+  const unreadable = !Number.isFinite(score);
+  score = unreadable ? 0 : clamp(score, 0, 100);
+  const [, verdict0, vSub0, solved0, comments] = verdictOf(score, CUSTOM_VERDICTS);
+  const st = lvl();
+  return {
+    custom: true, score, unreadable, framed: false, solved: !unreadable && solved0,
+    verdict: unreadable ? '鑑定不能' : verdict0, vSub: unreadable ? '鑑識の機械が判定できませんでした' : vSub0,
+    comment: !count ? '何も遺せずに息絶えました。' : pick(comments),
+    guess: 'カスタム事件のため、AI鑑識の解読は行っていません',
+    count, total,
+    shape: Math.round(100 * fin(chars.length ? chars.reduce((a, c) => a + c.shape, 0) / chars.length : 0)),
+    layout: Math.round(fin(layoutS) * 100),
+    dir: detectLayout(chars.map(c => c.sc), medSize),
+    chars: name.map((ch, i) => ({ ch, r: Math.round(fin(leg[i]) * 100) })),
+    expected: 0,
+    cm: (total / 37.8).toFixed(1), driftCm: (view.maxD / 37.8).toFixed(1),
+    no: String(Math.floor(rnd(1000, 9999))), odai, victim: st.victim,
+    stageIdx: -1, stageName: st.name, stageType: st.type, sec: st.sec,
     date: new Date(),
   };
 }
@@ -1379,7 +1497,7 @@ function makeCard(ev, res, mode = 'answer') {
   g.fillStyle = '#fff'; g.font = `46px ${BR}`; g.fillText('ダイイングメッセージ鑑定書', 50, 64);
   g.textAlign = 'right'; g.font = `700 22px ${SA}`;
   g.fillStyle = '#ffd23a'; g.fillText(`${res.stageName}（${res.sec}秒）　証拠品 No.${res.no}`, 1150, 46);
-  g.fillStyle = '#9aa3b8'; g.font = `500 22px ${SA}`; g.fillText('鑑識課 第七係 ／ 機械判定', 1150, 86);
+  g.fillStyle = '#9aa3b8'; g.font = `500 22px ${SA}`; g.fillText(res.victim ? `被害者：${res.victim}` : res.custom ? '鑑識課 第七係 ／ カスタム事件' : '鑑識課 第七係 ／ 機械判定', 1150, 86);
   // photo
   const px = 60, py = 170, pw = 1080, ph = 680;
   g.save(); g.shadowColor = 'rgba(20,25,40,.35)'; g.shadowBlur = 30; g.shadowOffsetY = 10;
@@ -1398,8 +1516,9 @@ function makeCard(ev, res, mode = 'answer') {
   for (let i = 0; i <= 20; i++) { g.fillStyle = '#1b2130'; g.fillRect(px + i * 21, ry, 2, i % 5 === 0 ? 18 : 10); }
   // the お題 next to the ruler: the answer, or only a hint in quiz mode
   {
-    const label = mode === 'quiz' ? 'お題（ヒント）' : 'お題';
-    const body = mode === 'quiz' ? `「${odaiHint(res.odai)}」${res.stageType}` : `「${res.odai}」${res.stageType}`;
+    const label = res.custom ? (mode === 'quiz' ? '遺した言葉（ヒント）' : '遺した言葉') : mode === 'quiz' ? 'お題（ヒント）' : 'お題';
+    const tail = res.custom ? '' : res.stageType;
+    const body = mode === 'quiz' ? `「${odaiHint(res.odai)}」${tail}` : `「${res.odai}」${tail}`;
     const maxW = 1140 - (px + 440);
     let fs = 30;
     const fit = () => { g.font = `700 ${fs}px ${SA}`; return g.measureText(label + ' ' + body).width; };
@@ -1411,7 +1530,7 @@ function makeCard(ev, res, mode = 'answer') {
   }
   // score
   const sy = 960;
-  g.fillStyle = '#556'; g.font = `700 28px ${SA}`; g.textAlign = 'left'; g.fillText('解読率', 60, sy);
+  g.fillStyle = '#556'; g.font = `700 28px ${SA}`; g.textAlign = 'left'; g.fillText(res.custom ? '再現度' : '解読率', 60, sy);
   g.fillStyle = '#c3121d'; g.font = `900 150px ${SA}`; g.textBaseline = 'alphabetic';
   if (res.unreadable) {
     g.font = `900 76px ${SA}`; g.fillText('解読不能', 56, sy + 136);
@@ -1427,20 +1546,20 @@ function makeCard(ev, res, mode = 'answer') {
   g.strokeStyle = '#d0101c'; g.lineWidth = 5; g.beginPath(); g.arc(0, 0, 62, 0, 7); g.stroke();
   g.lineWidth = 2; g.beginPath(); g.arc(0, 0, 54, 0, 7); g.stroke();
   g.fillStyle = '#d0101c'; g.font = `30px ${BR}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(res.solved ? '逮捕' : res.framed ? '冤罪' : '未解決', 0, 2);
+  g.fillText(res.custom ? '鑑定済' : res.solved ? '逮捕' : res.framed ? '冤罪' : '未解決', 0, 2);
   g.restore();
   // case verdict (no decoded name here: the card is for others to solve)
   const cx = 580, cw = 560, vcol = res.solved ? '#c3121d' : '#4a5468';
   g.textAlign = 'left'; g.textBaseline = 'middle';
   g.fillStyle = vcol; g.fillRect(cx, sy - 16, 6, 190);
-  g.fillStyle = '#556'; g.font = `700 22px ${SA}`; g.fillText('捜査結果', cx + 24, sy);
+  g.fillStyle = '#556'; g.font = `700 22px ${SA}`; g.fillText(res.custom ? '鑑定結果' : '捜査結果', cx + 24, sy);
   g.fillStyle = vcol; g.font = `58px ${BR}`; g.fillText(res.verdict, cx + 24, sy + 54);
   g.fillStyle = '#1b2130'; g.font = `26px ${BR}`;
   wrapText(g, res.comment, cw - 30).slice(0, 2).forEach((l, i) => g.fillText(l, cx + 24, sy + 116 + i * 34));
   // footer
   g.fillStyle = '#1b2130'; g.fillRect(0, 1160, 1200, 40);
   g.fillStyle = '#fff'; g.font = `700 20px ${SA}`; g.textAlign = 'center';
-  g.fillText(mode === 'quiz' ? '#ダイイングカリグラフィー　─　警察（みんな）、犯人の名前を解読してください'
+  g.fillText(mode === 'quiz' ? (res.custom ? '#ダイイングカリグラフィー　─　みんな、何と書いたか解読してください' : '#ダイイングカリグラフィー　─　警察（みんな）、犯人の名前を解読してください')
     : '#ダイイングカリグラフィー　─　お題と見比べてみてください', 600, 1181);
   return c;
 }
@@ -1448,7 +1567,8 @@ function makeCard(ev, res, mode = 'answer') {
 
 const FONT_TEXT = 'ダイイングメッセージ鑑定書証拠品鑑識課第七係機械判定現場床面に遺された血文字全貌達筆度鑑定済鑑識コメントAI解読警察みんな解読してください' +
   '#第一二三四の事件秒0123456789%（）／─No.解読率捜査結果逮捕未解決' +
-  VERDICTS.map(v => v[1]).join('') + '冤罪解読不能無関係逮捕真犯人逃亡';
+  VERDICTS.map(v => v[1]).join('') + '冤罪解読不能無関係逮捕真犯人逃亡' +
+  CUSTOM_VERDICTS.map(v => v[1]).join('') + '再現度鑑定済結果遺した言葉被害者カスタム何と書いたか';
 async function loadFonts(texts) {
   try {
     await Promise.race([
@@ -1465,12 +1585,12 @@ async function loadFonts(texts) {
 
 async function buildResult() {
   // the recogniser draws every candidate character with the web fonts: make sure they are loaded first
-  await loadFonts(candidatesOf([...odai][0]).join('') + odai);
+  await loadFonts(customStage ? odai : candidatesOf([...odai][0]).join('') + odai);
   const r = analyze();
   // free the previous round's photo and card right away (Safari counts every live canvas against its memory cap)
   for (const old of [evCanvas, cardCanvas, quizCanvas]) if (old) { old.width = 0; old.height = 0; }
   evCanvas = makeEvidence();
-  await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub + r.odai + r.stageType + 'お題ヒント〇見比べてみ');
+  await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub + r.odai + r.stageType + (r.victim || '') + 'お題ヒント〇見比べてみ');
   cardCanvas = makeCard(evCanvas, r, 'answer');
   quizCanvas = makeCard(evCanvas, r, 'quiz');
   $('#evImg').src = evCanvas.toDataURL('image/jpeg', 0.9);
@@ -1492,7 +1612,8 @@ function applyShareMode(mode) {
     b.classList.toggle('on', on); b.setAttribute('aria-checked', on);
   });
   const bx = $('#result .btnX');
-  if (bx) bx.innerHTML = '<span class="x">𝕏</span>' + (mode === 'quiz' ? 'で警察（みんな）に解読してもらう' : 'でお題と一緒に投稿する');
+  if (bx) bx.innerHTML = '<span class="x">𝕏</span>' + (mode === 'quiz' ? (customStage ? 'でみんなに解読してもらう' : 'で警察（みんな）に解読してもらう')
+    : customStage ? 'で言葉と一緒に投稿する' : 'でお題と一緒に投稿する');
   if (!shareModes) return;
   $('#cardImg').src = shareModes[mode].url;
   shareCtx = shareModes[mode].ctx;
@@ -1542,7 +1663,13 @@ function revealResult() {
   $('#evCap').textContent = `証拠品 No.${r.no}：現場床面に遺された血文字（全貌）`;
   $('#stShape').textContent = r.count ? r.shape + '%' : '-';
   $('#stLayout').textContent = r.count ? r.layout + '%' : '-';
-  $('#stCount').textContent = `${r.count}画（${r.expected}画）`;
+  $('#stCount').textContent = r.custom ? `${r.count}画` : `${r.count}画（${r.expected}画）`;
+  $('#stCountL').textContent = r.custom ? '画数' : '画数（お手本）';
+  $('#stOdaiL').textContent = r.custom ? '遺そうとした言葉' : '本人が書いたつもりの名前（お題）';
+  $('#scoreLabel').textContent = r.custom ? '血文字の再現度（形の崩れにくさ）' : '解読率（AI鑑識）';
+  $('#verdict small').textContent = r.custom ? '鑑定結果' : '捜査結果';
+  $('#btnRetry').textContent = r.custom ? 'もう一度書く（同じ言葉）' : 'この事件をやり直す（別の犯人）';
+  $('#btnSelect').textContent = r.custom ? 'カスタム設定に戻る' : '事件を選びなおす';
   $('#stDir').textContent = r.count ? r.dir : '-';
   const cs = $('#stChars'); cs.innerHTML = '';
   for (const c of r.chars) {
@@ -1553,12 +1680,12 @@ function revealResult() {
     s.appendChild(sm); cs.appendChild(s);
   }
   $('#stGuess').textContent = r.guess;
-  $('#stOdai').textContent = `「${r.odai}」（${r.stageType}）`;
+  $('#stOdai').textContent = r.custom ? `「${r.odai}」` : `「${r.odai}」（${r.stageType}）`;
   $('#comment').textContent = r.comment;
-  $('#stamp').textContent = r.solved ? '逮捕' : r.framed ? '冤罪' : '未解決';
+  $('#stamp').textContent = r.custom ? '鑑定済' : r.solved ? '逮捕' : r.framed ? '冤罪' : '未解決';
   showVerdict($('#verdict'), $('#vText'), $('#vSub'), r.verdict, r.vSub, r.solved);
-  track('stage_end', { stage: stageIdx + 1, score: r.score, verdict: r.verdict, solved: r.solved });
-  const nx = STAGES[stageIdx + 1];
+  track('stage_end', { stage: r.custom ? 'custom' : stageIdx + 1, score: r.score, verdict: r.verdict, solved: r.solved });
+  const nx = r.custom ? null : STAGES[stageIdx + 1];
   $('#btnNext').style.display = nx ? '' : 'none';
   if (nx) $('#btnNext').textContent = `${nx.name}へ ▶（${nx.type}・${nx.sec}秒）`;
   document.querySelectorAll('.note').forEach(n => n.textContent = '');
@@ -1577,6 +1704,14 @@ function toast(t) {
 const withUrl = t => /^https?:/.test(location.protocol) ? t + '\n' + location.href.split(/[?#]/)[0] : t;
 function stageShareText(r, mode) {
   const rate = r.unreadable ? '解読不能' : r.score + '%';
+  if (r.custom) {
+    // the link carries the same settings, so whoever opens it can try the same words
+    const who = r.victim ? `${r.victim}が` : '瀕死の私が';
+    const body = mode === 'quiz'
+      ? `カスタム事件（${r.sec}秒）で、${who}最期に遺した血文字。\nヒント：「${odaiHint(r.odai)}」\n血文字の再現度 ${rate}\nみんな、何と書いたか解読して🩸\n#ダイイングカリグラフィー`
+      : `カスタム事件（${r.sec}秒）で、${who}最期に「${r.odai}」と遺した血文字がこちら。\n血文字の再現度 ${rate}【${r.verdict}】\n#ダイイングカリグラフィー`;
+    return /^https?:/.test(location.protocol) ? body + '\n' + customUrl(mode === 'quiz') : body;
+  }
   if (mode === 'quiz') {
     return withUrl(`${r.stageName}（${r.stageType}・${r.sec}秒）で、瀕死の私が遺したダイイングメッセージ。\nヒント：「${odaiHint(r.odai)}」\n捜査結果【${r.verdict}】解読率 ${rate}\n警察（みんな）、犯人の名前を解読してください🩸\n#ダイイングカリグラフィー`);
   }
@@ -1701,7 +1836,7 @@ document.addEventListener('touchmove', e => { if (state === 'play' || state === 
 const BEST_KEY = 'dying-calligraphy:best:v2';
 function loadBest() { try { return JSON.parse(localStorage.getItem(BEST_KEY)) || {}; } catch (e) { return {}; } }
 function saveBest(r) {
-  if (r.unreadable) return;
+  if (r.unreadable || r.custom) return;
   try {
     const all = loadBest(), cur = all[r.stageIdx];
     if (!cur || r.score > cur.score) { all[r.stageIdx] = { score: r.score, verdict: r.verdict }; localStorage.setItem(BEST_KEY, JSON.stringify(all)); }
@@ -1720,16 +1855,92 @@ function renderStageList() {
     const bs = b.querySelector('.best');
     if (best[i]) bs.textContent = `最高記録：${best[i].verdict}（解読率 ${best[i].score}%）`;
     else { bs.textContent = 'まだ挑戦していません'; bs.classList.add('none'); }
-    b.addEventListener('click', () => { stageIdx = i; enterGame(); });
+    b.addEventListener('click', () => { customStage = null; stageIdx = i; enterGame(); });
     $('#stageList').appendChild(b);
   });
 }
-function toTitle() { state = 'title'; renderStageList(); show('title'); scr.title.scrollTop = 0; }
+function toTitle() {
+  state = 'title'; customStage = null; renderStageList(); show('title'); scr.title.scrollTop = 0;
+  // leaving the custom case: drop its settings from the address bar so a reload opens the normal title
+  if (/[#&]c=/.test(location.hash)) try { history.replaceState(null, '', location.href.split('#')[0]); } catch (e) {}
+}
 renderStageList();
+
+/* ---------- custom case setup ---------- */
+// the settings travel in the URL fragment (#c=…, base64url JSON) so a link can be shared without the
+// words sitting in plain sight; nothing is sent to a server
+const cu = { text: '', victim: '', sec: 10, lv: 1 };
+// spaces, control characters and invisible direction/zero-width marks are dropped (built from code points on purpose)
+const BAD_CHARS = new RegExp('[' + [[0, 31], [127, 127], [0x200b, 0x200f], [0x2028, 0x202e]].map(([a, b]) => String.fromCharCode(a) + '-' + String.fromCharCode(b)).join('') + ']', 'g');
+const cleanText = (s, max) => [...String(s || '').replace(/\s+/g, '').replace(BAD_CHARS, '')].slice(0, max).join('');
+const b64e = s => { const b = new TextEncoder().encode(s); let t = ''; b.forEach(x => t += String.fromCharCode(x)); return btoa(t).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const b64d = s => { const t = atob(s.replace(/-/g, '+').replace(/_/g, '/')); return new TextDecoder().decode(Uint8Array.from(t, c => c.charCodeAt(0))); };
+function customUrl() {
+  const base = location.href.split(/[?#]/)[0];
+  return base + '#c=' + b64e(JSON.stringify({ w: cu.text, v: cu.victim || undefined, t: cu.sec, d: cu.lv }));
+}
+function readCustomHash() {
+  const m = /[#&]c=([A-Za-z0-9_-]+)/.exec(location.hash);
+  if (!m) return false;
+  try {
+    const o = JSON.parse(b64d(m[1]));
+    cu.text = cleanText(o.w, CUSTOM_MAX);
+    cu.victim = cleanText(o.v, 12);
+    cu.sec = clamp(Math.round(+o.t) || 10, CUSTOM_SEC[0], CUSTOM_SEC[1]);
+    cu.lv = clamp(Math.round(+o.d) || 0, 0, CUSTOM_LEVELS.length - 1);
+    return !!cu.text;
+  } catch (e) { return false; }
+}
+function syncCustomForm() {
+  $('#cuText').value = cu.text; $('#cuVictim').value = cu.victim;
+  $('#cuSec').value = cu.sec; $('#cuSecV').textContent = cu.sec;
+  $('#cuCount').textContent = `${[...cu.text].length} / ${CUSTOM_MAX}文字`;
+  document.querySelectorAll('#cuLv button').forEach((b, i) => { b.classList.toggle('on', i === cu.lv); b.setAttribute('aria-checked', i === cu.lv); });
+  $('#cuGo').disabled = !cu.text;
+}
+CUSTOM_LEVELS.forEach((l, i) => {
+  const b = document.createElement('button');
+  b.textContent = l.label; b.setAttribute('role', 'radio');
+  b.addEventListener('click', () => { cu.lv = i; syncCustomForm(); });
+  $('#cuLv').appendChild(b);
+});
+// never rewrite the field while the IME is still composing (Japanese / Chinese input), only once it is committed
+const bindText = (el, max, set) => {
+  const apply = () => { const v = cleanText(el.value, max); if (v !== el.value) el.value = v; set(v); };
+  el.addEventListener('input', e => { if (!e.isComposing) apply(); });
+  el.addEventListener('compositionend', apply);
+};
+bindText($('#cuText'), CUSTOM_MAX, v => { cu.text = v; syncCustomForm(); });
+bindText($('#cuVictim'), 12, v => { cu.victim = v; });
+$('#cuSec').addEventListener('input', e => { cu.sec = +e.target.value; $('#cuSecV').textContent = cu.sec; });
+function openCustom() { state = 'custom'; customStage = null; syncCustomForm(); show('custom'); scr.custom.scrollTop = 0; }
+function startCustom() {
+  if (!cu.text) return;
+  const lv = CUSTOM_LEVELS[cu.lv], n = [...cu.text].length;
+  customStage = { custom: true, name: 'カスタム事件', type: `${n}文字・${lv.label}`, sec: cu.sec, sway: lv.sway, speed: lv.speed,
+    len: 0.4 * n, odai: [cu.text], victim: cu.victim };
+  try { history.replaceState(null, '', customUrl()); } catch (e) {}
+  enterGame();
+}
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) {}
+  try {
+    const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch (e) { return false; }
+}
+$('#btnCustom').addEventListener('click', openCustom);
+$('#cuGo').addEventListener('click', startCustom);
+$('#cuBack').addEventListener('click', toTitle);
+$('#cuLink').addEventListener('click', async () => {
+  if (!cu.text) { toast('先に「遺す言葉」を入力してください'); return; }
+  toast(await copyText(customUrl()) ? 'この設定で遊べるURLをコピーしました' : 'コピーできませんでした');
+});
+if (readCustomHash()) openCustom();
 
 $('#btnRetry').addEventListener('click', () => enterGame());
 $('#btnNext').addEventListener('click', () => { if (stageIdx < STAGES.length - 1) { stageIdx++; enterGame(); } });
-$('#btnSelect').addEventListener('click', toTitle);
+$('#btnSelect').addEventListener('click', () => { if (customStage) openCustom(); else toTitle(); });
 document.querySelectorAll('.btnX').forEach(b => b.addEventListener('click', shareX));
 document.querySelectorAll('.btnSave').forEach(b => b.addEventListener('click', () => { if (shareCtx) { downloadCard(); toast('カード画像を保存しました'); } }));
 window.addEventListener('resize', () => { if (state === 'ready') resetGame(); });
