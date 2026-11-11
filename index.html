@@ -1725,12 +1725,12 @@ const withUrl = t => /^https?:/.test(location.protocol) ? t + '\n' + location.hr
 function stageShareText(r, mode) {
   const rate = r.unreadable ? '解読不能' : r.score + '%';
   if (r.custom) {
-    // the link carries the same settings, so whoever opens it can try the same words
     const who = r.victim ? `${r.victim}が` : '瀕死の私が';
     const body = mode === 'quiz'
       ? `カスタム事件（${r.sec}秒）で、${who}最期に遺した血文字。\nヒント：「${odaiHint(r.odai)}」\n血文字の再現度 ${rate}\nみんな、何と書いたか解読して🩸\n#ダイイングカリグラフィー`
       : `カスタム事件（${r.sec}秒）で、${who}最期に「${r.odai}」と遺した血文字がこちら。\n血文字の再現度 ${rate}【${r.verdict}】\n#ダイイングカリグラフィー`;
-    return /^https?:/.test(location.protocol) ? body + '\n' + customUrl(mode === 'quiz') : body;
+    // the post carries the plain game URL (the settings link is long); the setup screen still copies the settings link
+    return withUrl(body);
   }
   if (mode === 'quiz') {
     return withUrl(`${r.stageName}（${r.stageType}・${r.sec}秒）で、瀕死の私が遺したダイイングメッセージ。\nヒント：「${odaiHint(r.odai)}」\n捜査結果【${r.verdict}】解読率 ${rate}\n警察（みんな）、犯人の名前を解読してください🩸\n#ダイイングカリグラフィー`);
