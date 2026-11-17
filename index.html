@@ -476,7 +476,12 @@ let nextBeat = 0, pulse = 0, tun = { x: 0, y: 0 };
 let msgPhase = 0, odai = '';
 let result = null, cardCanvas = null, evCanvas = null;
 let shareCtx = null; // { canvas, blob, text, name }
-let noiseImg = null, frame = 0;
+let noiseImg = null, frame = 0, lastNoise = 0;
+// fs = this frame's length in 60fps frames. Every per-frame chance, decay and step below is tuned
+// for 60fps and scaled by fs, so 120/144/240Hz screens get the same blackouts and sway as 60Hz ones
+let fs = 1;
+const perFrame = q => q * fs;                    // chance per 60fps frame -> chance this frame
+const decay = k => Math.pow(k, fs);              // decay per 60fps frame -> decay this frame
 
 function show(name) {
   for (const k in scr) scr[k].classList.toggle('active', k === name);
@@ -653,9 +658,10 @@ function updateView(now) {
   const A = base * (0.004 + 0.15 * Math.pow(p, 1.4)) * sw;
   view.A = A;
   // dizzy spells: the whole floor slides away, then slowly drifts back
-  if (state === 'play' && rnd() < (0.002 + 0.025 * p * p) * sw) lurch(A * rnd(0.6, 1.4));
-  view.lvx *= 0.9; view.lvy *= 0.9;
-  view.lx = view.lx * 0.992 + view.lvx; view.ly = view.ly * 0.992 + view.lvy;
+  if (state === 'play' && rnd() < perFrame((0.002 + 0.025 * p * p) * sw)) lurch(A * rnd(0.6, 1.4));
+  const kv = decay(0.9), kl = decay(0.992);
+  view.lvx *= kv; view.lvy *= kv;
+  view.lx = view.lx * kl + view.lvx * fs; view.ly = view.ly * kl + view.lvy * fs;
   view.x = A * (Math.sin(t * 0.53 + ph[0]) * 0.6 + Math.sin(t * 1.27 + ph[1]) * 0.4) + view.lx;
   view.y = A * (Math.sin(t * 0.47 + ph[2]) * 0.6 + Math.sin(t * 1.09 + ph[3]) * 0.4) + view.ly + base * 0.05 * p * p * sw;
   view.rot = (Math.sin(t * 0.41 + ph[4]) * 0.7 + Math.sin(t * 0.93 + ph[5]) * 0.3) * (0.004 + 0.12 * Math.pow(p, 1.5)) * sw;
@@ -698,7 +704,7 @@ function addPoint(x, y, sx, sy, now) {
   const dx = x - last.x, dy = y - last.y, d = Math.hypot(dx, dy);
   if (d < 1.2) {
     // pen resting: blood pools & may drip
-    if (now - last.t > 260 && rnd() < 0.04) { spawnDrip(x, y, rnd(0.7, 1.3)); last.t = now; }
+    if (now - last.t > 260 && rnd() < perFrame(0.04)) { spawnDrip(x, y, rnd(0.7, 1.3)); last.t = now; }
     return;
   }
   const dt = Math.max(1, now - last.t), v = d / dt;
@@ -717,10 +723,10 @@ function spawnDrip(x, y, s) {
 function updateDrips() {
   for (let i = drips.length - 1; i >= 0; i--) {
     const d = drips[i];
-    const ny = d.y + d.vy * (0.6 + rnd(0.8)), nx = d.x + rnd(-0.15, 0.15);
+    const ny = d.y + d.vy * (0.6 + rnd(0.8)) * fs, nx = d.x + rnd(-0.15, 0.15) * Math.sqrt(fs);
     ictx.strokeStyle = d.col; ictx.lineWidth = d.w; ictx.lineCap = 'round';
     ictx.beginPath(); ictx.moveTo(d.x, d.y); ictx.lineTo(nx, ny); ictx.stroke();
-    d.life -= ny - d.y; d.x = nx; d.y = ny; d.w *= 0.997;
+    d.life -= ny - d.y; d.x = nx; d.y = ny; d.w *= decay(0.997);
     extend(nx, ny, d.w);
     if (d.life <= 0 || ny > H + M) { dot(nx, ny, d.w * 0.75, d.col); drips.splice(i, 1); }
   }
@@ -781,10 +787,10 @@ function updateFx(now) {
       if (p > 0.5) lurch(view.A * 0.5);
     }
   }
-  pulse *= 0.9;
+  pulse *= decay(0.9);
 
   // blackouts: consciousness flickers out for a moment, and the world has moved when it returns
-  if (!blink && p > 0.25 && rnd() < (0.003 + 0.022 * p * p) * sw * (lvl().vis ? lvl().vis.blink : 1)) {
+  if (!blink && p > 0.25 && rnd() < perFrame((0.003 + 0.022 * p * p) * sw * (lvl().vis ? lvl().vis.blink : 1))) {
     blink = { t: now, d: (0.25 + 0.75 * p) * 1000 };
     lurch(view.A * 1.5);
   }
@@ -797,7 +803,8 @@ function updateFx(now) {
 
   // tunnel follows where you stare (the pen)
   const tx = down ? hand.x : W / 2, ty = down ? hand.y : H / 2;
-  tun.x = lerp(tun.x, tx, 0.06); tun.y = lerp(tun.y, ty, 0.06);
+  const kt = 1 - decay(0.94);
+  tun.x = lerp(tun.x, tx, kt); tun.y = lerp(tun.y, ty, kt);
   if (k1 > 0) {
     const e = k1 * k1 * (3 - 2 * k1);
     const R = lerp(Math.hypot(W, H) * 0.55, base * 0.09, e) * (1 - 0.08 * pulse);
@@ -813,7 +820,7 @@ function updateFx(now) {
   fog.style.opacity = (0.12 * k1 + 0.75 * k3).toFixed(3);
   noise.style.opacity = (k3 * 0.5).toFixed(3);
   if (k3 > 0) {
-    if (frame % 2 === 0) renderNoise();
+    if (now - lastNoise >= 30) { lastNoise = now; renderNoise(); }   // ~30 times a second on any screen
     if (tinn) tinn.g.gain.setTargetAtTime(0.004 + 0.03 * k3, AC.currentTime, 0.1);
     else tinnitus(true);
   }
@@ -1974,6 +1981,7 @@ function loop(now) {
   requestAnimationFrame(loop);
   frame++;
   const dt = clamp((now - lastFrame) / 1000, 0, 0.05); lastFrame = now;
+  fs = dt * 60;
   if (state === 'play') {
     // the frame timestamp can be a few ms older than the touch that started the clock:
     // never let elapsed go negative (a negative power below turns everything into NaN)
