@@ -606,8 +606,9 @@ function setup() {
     if (!canvasBroken || tries >= 6) break;
     DPR *= 0.6;   // too big for this browser: try again smaller
   }
-  // still broken at every size: keep the normal size (the result photo is rebuilt from the strokes)
-  if (canvasBroken) { DPR = dpr0; size(); }
+  // still broken at every size: these canvases are useless here, so shrink them to almost nothing and
+  // give the memory back — the result photo and the share cards need it (the photo is rebuilt from the strokes)
+  if (canvasBroken) { DPR = dpr0; for (const c of [bg, ink, pen]) c.width = c.height = 1; }
   for (const ctx of [bctx, ictx, pctx]) ctx.setTransform(DPR, 0, 0, DPR, M * DPR, M * DPR);
   const nw = 140, nh = Math.max(1, Math.round(140 * H / W));
   noise.width = nw; noise.height = nh; noiseImg = nctx.createImageData(nw, nh);
@@ -869,7 +870,15 @@ function resetGame() {
   $('#slow').classList.remove('on');
   ready.style.display = 'flex';
 }
+// the last round's photo and cards are not needed once a new round starts: free them BEFORE the floor
+// canvases are sized, so they never push a memory-tight browser (iPad Safari) over its canvas limit
+function freeResultCanvases() {
+  for (const old of [evCanvas, cardCanvas, quizCanvas]) if (old) { old.width = 0; old.height = 0; }
+  evCanvas = cardCanvas = quizCanvas = null;
+  shareModes = null; shareCtx = null;
+}
 function enterGame() {
+  freeResultCanvases();
   initAudio();
   const o = pick(lvl().odai);
   [odai, odaiStrokes] = typeof o === 'string' ? [o, strokesOf(o)] : o;
@@ -1435,7 +1444,8 @@ function analyzeCustom({ name, n, chars, coll, present, charsS, layoutS, total, 
 }
 
 /* evidence crop: full picture of what you wrote */
-function makeEvidence() {
+// fromStrokes: redraw the writing from the recorded strokes in a small photo (fallback when memory is tight)
+function makeEvidence(fromStrokes = false) {
   const AR = 1080 / 680;
   let x0, y0, x1, y1;
   if (isFinite(bbox.x0)) {
@@ -1451,15 +1461,16 @@ function makeEvidence() {
   if (w <= FX1 - FX0) cx = clamp(cx, FX0 + w / 2, FX1 - w / 2);
   if (h <= FY1 - FY0) cy = clamp(cy, FY0 + h / 2, FY1 - h / 2);
   const ex0 = cx - w / 2, ey0 = cy - h / 2;
-  const scale = Math.min(Math.max(DPR, 1), 1400 / w);
+  const scale = fromStrokes ? Math.min(1, 900 / w) : Math.min(Math.max(DPR, 1), 1400 / w);
   const c = document.createElement('canvas');
   c.width = Math.round(w * scale); c.height = Math.round(h * scale);
   const g = c.getContext('2d');
+  if (!g) throw new Error('no canvas memory for the photo');
   // anything beyond the floor canvas (tall phone screens) becomes plain floor tone
   g.fillStyle = '#cbbd9f'; g.fillRect(0, 0, c.width, c.height);
   const ix0 = Math.max(ex0, FX0), iy0 = Math.max(ey0, FY0);
   const ix1 = Math.min(ex0 + w, FX1), iy1 = Math.min(ey0 + h, FY1);
-  if (canvasBroken) {
+  if (canvasBroken || fromStrokes) {
     // the floor canvases could not draw on this device: rebuild the writing from the recorded strokes
     const k = c.width / w;
     g.save(); g.scale(k, k); g.translate(-ex0, -ey0);
@@ -1610,23 +1621,42 @@ async function loadFonts(texts) {
   } catch (e) {}
 }
 
+// the result screen must ALWAYS appear: if a browser runs out of canvas memory (iPad Safari) and the
+// photo or the cards cannot be made, the round still ends with its score instead of a black screen
+const tryOr = (f, fallback = null) => { try { return f(); } catch (e) { console.warn(e); return fallback; } };
+const isBlankUrl = u => !u || u.length < 100;   // a dead canvas exports "data:," instead of an image
 async function buildResult() {
+  freeResultCanvases();
   // the recogniser draws every candidate character with the web fonts: make sure they are loaded first
-  await loadFonts(customStage ? odai : candidatesOf([...odai][0]).join('') + odai);
+  await loadFonts(customStage ? odai : candidatesOf([...odai][0]).join('') + odai).catch(() => {});
   const r = analyze();
-  // free the previous round's photo and card right away (Safari counts every live canvas against its memory cap)
-  for (const old of [evCanvas, cardCanvas, quizCanvas]) if (old) { old.width = 0; old.height = 0; }
-  evCanvas = makeEvidence();
-  await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub + r.odai + r.stageType + (r.victim || '') + 'お題ヒント〇見比べてみ');
-  cardCanvas = makeCard(evCanvas, r, 'answer');
-  quizCanvas = makeCard(evCanvas, r, 'quiz');
-  $('#evImg').src = evCanvas.toDataURL('image/jpeg', 0.9);
+  // photo: normally cut from the floor; if that fails, redraw the strokes in a smaller photo; else none
+  let evUrl = '';
+  for (const fromStrokes of [false, true]) {
+    evCanvas = tryOr(() => makeEvidence(fromStrokes));
+    evUrl = evCanvas ? tryOr(() => evCanvas.toDataURL('image/jpeg', 0.9), '') : '';
+    if (!isBlankUrl(evUrl)) break;
+    if (evCanvas) { evCanvas.width = evCanvas.height = 0; evCanvas = null; }
+  }
+  $('#evImg').src = isBlankUrl(evUrl) ? '' : evUrl;
+  $('#evidence').style.display = isBlankUrl(evUrl) ? 'none' : '';
   saveBest(r);
-  // both cards are ready before the result shows, so switching modes and sharing work instantly
-  shareModes = {
-    answer: { url: cardCanvas.toDataURL('image/png'), ctx: makeShareCtx(cardCanvas, stageShareText(r, 'answer'), `dying-message-${r.no}.png`) },
-    quiz: { url: quizCanvas.toDataURL('image/png'), ctx: makeShareCtx(quizCanvas, stageShareText(r, 'quiz'), `dying-message-quiz-${r.no}.png`) },
-  };
+  shareModes = null; shareCtx = null;
+  if (evCanvas) {
+    await loadFonts(FONT_TEXT + r.comment + r.guess + r.vSub + r.odai + r.stageType + (r.victim || '') + 'お題ヒント〇見比べてみ').catch(() => {});
+    // both cards are ready before the result shows, so switching modes and sharing work instantly
+    const card = (mode, name) => tryOr(() => {
+      const c = makeCard(evCanvas, r, mode), url = c.toDataURL('image/png');
+      if (isBlankUrl(url)) { c.width = c.height = 0; return null; }
+      return { c, url, ctx: makeShareCtx(c, stageShareText(r, mode), name) };
+    });
+    const a = card('answer', `dying-message-${r.no}.png`), q = a && card('quiz', `dying-message-quiz-${r.no}.png`);
+    cardCanvas = a ? a.c : null; quizCanvas = q ? q.c : null;
+    if (a && q) shareModes = { answer: a, quiz: q };
+  }
+  // no cards (out of memory): the share section is hidden, the score and buttons still work
+  $('#result .share').style.display = shareModes ? '' : 'none';
+  if (!shareModes) $('#cardImg').removeAttribute('src');
   applyShareMode(shareMode);
   result = r;
 }
